@@ -21,25 +21,27 @@ class Barrel(BaseModel):
 
 @router.post("/deliver/{order_id}")
 def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
-    with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
     """ """
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
+
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text(sql_to_execute))
 
     return "OK"
 
 # Gets called once a day
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
-    with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
     """ """
     print(wholesale_catalog)
 
+    with db.engine.begin() as connection:
+        num_potions = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory"))
+
     return [
         {
-            "sku": "SMALL_RED_BARREL",
-            "quantity": 1,
+            "sku": "SMALL_GREEN_BARREL",
+            "quantity": 1 if num_potions < 10 else 0,
         }
     ]
 
