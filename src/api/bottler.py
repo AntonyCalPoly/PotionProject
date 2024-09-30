@@ -42,15 +42,17 @@ def get_bottle_plan():
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory")).first()[0]
-        result = result_cursor.fetchone()
+        result = result.fetchone()
         quantity = int(result // 100)
 
-    return [
-            {
-                "potion_type": [0, 100, 0, 0],
-                "quantity": quantity,
-            }
+    if quantity > 0:
+        return [
+                {
+                    "potion_type": [0, 100, 0, 0],
+                    "quantity": quantity,
+                }
         ]
+    return  []
 
 if __name__ == "__main__":
     print(get_bottle_plan())
