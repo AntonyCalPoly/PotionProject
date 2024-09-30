@@ -26,6 +26,16 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
             result = connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_ml = num_green_ml - {potion.quantity * 100}"))
             result = connection.execute(sqlalchemy.text(f"UPDTAE globa_inventory SET num_green_potions = num_green_potions + {potion.quantity}"))
 
+        if potion.quantity > 0:
+            return [
+                    {
+                        "potion_type": [0, 100, 0, 0],
+                        "quantity": potion.quantity,
+                    }
+            ]
+        else:
+            return  []
+    
     return "OK"
 
 @router.post("/plan")
@@ -52,7 +62,8 @@ def get_bottle_plan():
                     "quantity": quantity,
                 }
         ]
-    return  []
+    else:
+        return  []
 
 if __name__ == "__main__":
     print(get_bottle_plan())

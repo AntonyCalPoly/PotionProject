@@ -26,8 +26,8 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 
     with db.engine.begin() as connection:
         for barrel in barrels_delivered:
-            updateBarrels = connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_ml = num_green_ml + ({barrels_delivered[0].ml_per_barrel} * {barrels_delivered[0].quantity})")),
-            updateGold = connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold - ({barrels_delivered[0].price} * {barrels_delivered[0].quantity})"))
+            updateBarrels = connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_ml = num_green_ml + ({barrel.ml_per_barrel * barrel.quantity})"))
+            updateGold = connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold - ({barrel.price * barrel.quantity})"))
 
     return "OK"
 
@@ -46,14 +46,13 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         if green_pots >= 10:
             return -1
         
-        affordable = next((barrel for barrel in wholesale_catalog if gold >= barrel.price), None)
+        for barrel in wholesale_catalog:
+            if barrel.sku == "SMALL_GREEN_BARREL" and barrel.price <= gold:
 
-        if affordable:
-
-            return [
-                {
-                    "sku": "SMALL_GREEN_BARREL",
-                    "quantity": 1,
-                }
-            ]
+                return [
+                    {
+                        "sku": "SMALL_GREEN_BARREL",
+                        "quantity": 1,
+                    }
+                ]
    
