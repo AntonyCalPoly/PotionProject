@@ -42,7 +42,7 @@ def get_bottle_plan():
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory")).first()[0]
-
+        result = result_cursor.fetchone()
         quantity = int(result // 100)
 
     return [
