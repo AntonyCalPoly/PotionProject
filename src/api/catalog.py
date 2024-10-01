@@ -14,7 +14,7 @@ def get_catalog():
             ammount = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory"))
             ammount_data = ammount.fetchone()
 
-    if ammount_data[0] != 0:
+    if (ammount_data[0] > 0):
         
         return [
                 {
