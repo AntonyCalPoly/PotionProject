@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from src.api import auth
 from enum import Enum
 
+
 router = APIRouter(
     prefix="/carts",
     tags=["cart"],
@@ -88,6 +89,11 @@ def post_visits(visit_id: int, customers: list[Customer]):
 def create_cart(new_cart: Customer):
     
     """ """
+    with db.engine.begin() as connection:
+        num_green_cost = connection.execute(sqlalchemy.text("INSERT INTO cart (num_of_green_potions) VALUES (0)"))
+        cart_id  = connection.execute(sqlalchemy.text("SELECT id FROM cart ORDER BY id DESC")).scalar()
+        return {"cart_id": cart_id} 
+    
     return {"cart_id": 1}
 
 
