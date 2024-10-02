@@ -16,10 +16,10 @@ def get_inventory():
     """ """
     with db.engine.begin() as connection:
         inventory = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory")).fetchall()
-        potions = inventory[0].number_of_potions
-        milli = inventory[0].ml_in_barrels
+        potions = inventory[0].num_green_potions
+        milli = inventory[0].num_green_ml
         gold = inventory[0].gold
-        return {potions, milli, gold}
+        return {"number_of_potions": potions, "number_of_milliliters": milli, "number_of_gold": gold}
 
 # Gets called once a day
 @router.post("/plan")
