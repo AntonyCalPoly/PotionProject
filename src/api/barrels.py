@@ -39,10 +39,30 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     print(wholesale_catalog)
 
     with db.engine.begin() as connection:
-        num_potions = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).first()
-        num_gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).first()
-        green_pots = num_potions[2]
-        gold = num_gold[4]
+        num_potions = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).fetchone()
+        num_gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).fetchone()
+        green_pots = num_potions[0]
+        gold = num_gold[0]
+        cost : int
+
+        for barrel in wholesale_catalog:
+            if barrel.sku == "SMALL_GREEN_BARREL" :
+                cost = barrel.price
+        if green_pots < 10 and gold >= barrel.price :
+            return [
+                {
+                    "sku": "SMALL_GREEN_BARREL",
+                    "quantity": 1,
+                }
+            ]
+        return []
+    
+    '''
+    with db.engine.begin() as connection:
+        num_potions = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).fetchone()
+        num_gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).fetchone()
+        green_pots = num_potions[0]
+        gold = num_gold[0]
         quantity = 0
         if (green_pots < 10):   
         
@@ -57,4 +77,5 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 }
             ]
         return []
+    '''
     
