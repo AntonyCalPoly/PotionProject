@@ -90,7 +90,7 @@ def create_cart(new_cart: Customer):
     
     """ """
     with db.engine.begin() as connection:
-        num_green_cost = connection.execute(sqlalchemy.text("INSERT INTO cart (num_of_green_potions) VALUES (0)"))
+        num_green_cost = connection.execute(sqlalchemy.text("INSERT INTO cart (quantity) VALUES (0)"))
         cart_id  = connection.execute(sqlalchemy.text("SELECT id FROM cart ORDER BY id DESC")).scalar()
         return {"cart_id": cart_id} 
     
