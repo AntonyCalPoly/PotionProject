@@ -105,7 +105,7 @@ class CartItem(BaseModel):
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
     with db.engine.begin() as connection:
-        connection.execute(sqlalchemy.text(f"UPDATE cart SET num_of_green_potions = {cart_item.quantity} WHERE id = {cart_id}"))
+        connection.execute(sqlalchemy.text(f"UPDATE cart SET quantity = {cart_item.quantity} WHERE id = {cart_id}"))
 
     return "OK"
 
