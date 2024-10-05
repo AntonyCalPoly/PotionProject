@@ -92,8 +92,8 @@ def create_cart(new_cart: Customer):
         result = connection.execute(sqlalchemy.text(f"SELECT customer_name, customer_class, customer_level, id, quantity, payment FROM cart WHERE customer_name = '{new_cart.customer_name}' and customer_class = '{new_cart.character_class}' and customer_level = '{new_cart.level}';"))
         result_new = result.fetchall()
         if len(result_new) == 0 :
-            cart_id  = connection.execute(sqlalchemy.text("SELECT id FROM cart ORDER BY id DESC")).fetchone()
-            update_id = (cart_id[0]+1)
+            update_id  = connection.execute(sqlalchemy.text("SELECT id FROM cart ORDER BY id DESC")).fetchone()
+            cart_id = (update_id[0]+1)
             connection.execute(sqlalchemy.text(f"INSERT INTO cart (customer_name, customer_class, customer_level, id, quantity, payment) VALUES ('{new_cart.customer_name}','{new_cart.character_class}',{new_cart.level},{cart_id},{0},{0});"))
         else:
             cart_id = result_new[0][1]
