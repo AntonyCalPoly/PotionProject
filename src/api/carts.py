@@ -89,17 +89,17 @@ def post_visits(visit_id: int, customers: list[Customer]):
 def create_cart(new_cart: Customer):
     
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text(f"SELECT customer_name, customer_class, customer_level, id, quantity, payment FROM cart WHERE customer_name = '{new_cart.customer_name}' and customer_class = '{new_cart.character_class}' and customer_level = '{new_cart.level}';"))
+        result = connection.execute(sqlalchemy.text(f"SELECT customer_name, character_class, level, cart_id, quantity, payment FROM cart WHERE customer_name = '{new_cart.customer_name}' and character_class = '{new_cart.character_class}' and level = '{new_cart.level}';"))
         result_new = result.fetchall()
         if len(result_new) == 0 :
-            update_id  = connection.execute(sqlalchemy.text("SELECT id FROM cart ORDER BY id DESC")).fetchone()
-            id = (update_id[0]+1)
-            connection.execute(sqlalchemy.text(f"INSERT INTO cart (customer_name, customer_class, customer_level, id, quantity, payment) VALUES ('{new_cart.customer_name}','{new_cart.character_class}',{new_cart.level},{cart_id},{0},{0});"))
+            update_id  = connection.execute(sqlalchemy.text("SELECT cart_id FROM cart ORDER BY cart_id DESC")).fetchone()
+            cart_id = (update_id[0]+1)
+            connection.execute(sqlalchemy.text(f"INSERT INTO cart (customer_name, character_class, level, cart_id, quantity, payment) VALUES ('{new_cart.customer_name}','{new_cart.character_class}',{new_cart.level},{cart_id},{0},{0});"))
         else:
-            id = result_new[0][1]
-            connection.execute(sqlalchemy.text(f"UPDATE cart SET quantity = 0, payment = 0 WHERE customer_name = '{new_cart.customer_name}' and customer_class = '{new_cart.character_class}' and customer_level = '{new_cart.level}';"))
+            cart_id = result_new[0][1]
+            connection.execute(sqlalchemy.text(f"UPDATE cart SET quantity = 0, payment = 0 WHERE customer_name = '{new_cart.customer_name}' and charatcer_class = '{new_cart.character_class}' and level = '{new_cart.level}';"))
     
-    return {"cart_id": id}
+    return {"cart_id": cart_id}
 
 class CartItem(BaseModel):
     quantity: int
