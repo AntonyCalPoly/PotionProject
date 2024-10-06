@@ -93,13 +93,13 @@ def create_cart(new_cart: Customer):
         result_new = result.fetchall()
         if len(result_new) == 0 :
             update_id  = connection.execute(sqlalchemy.text("SELECT id FROM cart ORDER BY id DESC")).fetchone()
-            cart_id = (update_id[0]+1)
+            id = (update_id[0]+1)
             connection.execute(sqlalchemy.text(f"INSERT INTO cart (customer_name, customer_class, customer_level, id, quantity, payment) VALUES ('{new_cart.customer_name}','{new_cart.character_class}',{new_cart.level},{cart_id},{0},{0});"))
         else:
-            cart_id = result_new[0][1]
+            id = result_new[0][1]
             connection.execute(sqlalchemy.text(f"UPDATE cart SET quantity = 0, payment = 0 WHERE customer_name = '{new_cart.customer_name}' and customer_class = '{new_cart.character_class}' and customer_level = '{new_cart.level}';"))
     
-    return {"cart_id": cart_id}
+    return {"cart_id": id}
 
 class CartItem(BaseModel):
     quantity: int
