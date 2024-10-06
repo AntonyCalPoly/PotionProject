@@ -26,8 +26,8 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 
     with db.engine.begin() as connection:
         for barrel in barrels_delivered:
-            num_green_ml = connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory")).scalar()
-            connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_ml = ({num_green_ml + barrel.ml_per_barrel * barrel.quantity})"))
+            num_mls = connection.execute(sqlalchemy.text("SELECT num_ml FROM global_inventory")).scalar()
+            connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = ({num_mls + barrel.ml_per_barrel * barrel.quantity})"))
             connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold - ({barrel.price * barrel.quantity})"))
 
     return "OK"
@@ -39,66 +39,60 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     print(wholesale_catalog)
 
     with db.engine.begin() as connection:
-        num_potions = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).fetchone()
-        num_gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).fetchone()
-        green_pots = num_potions[0]
-        gold = num_gold[0]
-        cost : int
+        inventory = connection.execute(sqlalchemy.text("SELECT num_potions, sku, gold FROM global_inventory")).fetchall()
 
-        for barrel in wholesale_catalog:
-            if barrel.sku == "SMALL_GREEN_BARREL" :
-                cost = barrel.price
-        if green_pots < 10 and gold >= cost :
-            return [
-                {
-                    "sku": "SMALL_GREEN_BARREL",
-                    "quantity": 1,
-                }
-            ]
-    
-        '''
-            if barrel.sku == "SMALL_RED_BARREL" :
-                cost = barrel.price
-        if green_pots < 10 and gold >= cost :
-            return [
-                {
-                    "sku": "SMALL_RED_BARREL",
-                    "quantity": 1,
-                }
-            ]
+    green_pots = 0
+    red_pots = 0
+    blue_pots = 0
+    gold = inventory[0].gold
 
-        for barrel in wholesale_catalog:
-            if barrel.sku == "SMALL_BLUE_BARREL" :
-                cost = barrel.price
-        if green_pots < 10 and gold >= cost :
-            return [
-                {
-                    "sku": "SMALL_BLUE_BARREL",
-                    "quantity": 1,
-                }
-            ]
-        return []
-        '''
+
+
+    for entry in inventory:
+        if entry.sku == "GREEN_POTION_0":
+            green_pots = entry.num_potions
+        if entry.sku == "RED_POTION_0":
+            red_pots = entry.num_potions
+        if entry.sku == "BLUE_POTION_0":
+            blue_pots = entry.num_potions
+
+    small_green_barrels_needed = 0
+    small_red_barrels_needed = 0
+    small_blue_barrels_needed = 0
+
+    for barrel in wholesale_catalog:
+        if barrel.sku == "SMALL_GREEN_BARREL" and green_pots <= 10 and barrel.price <= gold:
+            small_green_barrels_needed +=1
+            gold -= barrel.price
+
+        if barrel.sku == "SMALL_RED_BARREL" and red_pots <= 10 and barrel.price <= gold:
+            small_red_barrels_needed +=1
+            gold -= barrel.price
+
+        if barrel.sku == "SMALL_BLUE_BARREL" and blue_pots <= 10 and barrel.price <= gold:
+            small_blue_barrels_needed +=1
+            gold -= barrel.price
     
-    '''
-    with db.engine.begin() as connection:
-        num_potions = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).fetchone()
-        num_gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).fetchone()
-        green_pots = num_potions[0]
-        gold = num_gold[0]
-        quantity = 0
-        if (green_pots < 10):   
-        
-            for barrel in wholesale_catalog:
-                if barrel.sku == "SMALL_GREEN_BARREL" and gold >= barrel.price:
-                    quantity +=1
-        if quantity > 0:
-            return [
-                {
-                    "sku": "SMALL_GREEN_BARREL",
-                    "quantity": quantity,
-                }
-            ]
-        return []
-    '''
+    if (small_green_barrels_needed > 0):
+        return [
+            {
+                "sku": "SMALL_GREEN_BARREL",
+                "quantity": small_green_barrels_needed,
+            }
+        ]
     
+    if (small_red_barrels_needed > 0):
+        return [
+            {
+                "sku": "SMALL_RED_BARREL",
+                "quantity": small_red_barrels_needed,
+            }
+        ]
+    
+    if (small_blue_barrels_needed > 0):
+        return [
+            {
+                "sku": "SMALL_BLUE_BARREL",
+                "quantity": small_blue_barrels_needed,
+            }
+        ]
