@@ -11,19 +11,39 @@ def get_catalog():
     Each unique item combination must have only a single price.
     """
     with db.engine.begin() as connection:
-            ammount = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory"))
-            ammount_data = ammount.fetchone()
-
-    if (ammount_data[0] > 0):
+        green_potions_available = connection.execute(sqlalchemy.text("SELECT sku,num_potions,cost FROM global_inventory WHERE sku = 'GREEN_POTION_0';")).fetchone()
         
-        return [
+        red_potions_available = connection.execute(sqlalchemy.text("SELECT sku,num_potions,cost FROM global_inventory WHERE sku = 'RED_POTION_0';")).fetchone()
+
+        blue_potions_available = connection.execute(sqlalchemy.text("SELECT sku,num_potions,cost FROM global_inventory WHERE sku = 'BLUE_POTION_0';")).fetchone()
+
+    if green_potions_available.num_potions > 0:
+         return [
                 {
-                    "sku": "GREEN_POTION_0",
+                    "sku": green_potions_available.sku,
                     "name": "green potion",
-                    "quantity": ammount_data[0],
-                    "price": 50,
+                    "quantity": green_potions_available.num_potions,
+                    "price": green_potions_available.cost,
                     "potion_type": [0, 100, 0, 0],
                 }
         ]
-    else:
-         return []
+    if red_potions_available.num_potions > 0:
+         return [
+                {
+                    "sku": red_potions_available.sku,
+                    "name": "red potion",
+                    "quantity": red_potions_available.num_potions,
+                    "price": red_potions_available.cost,
+                    "potion_type": [100, 0, 0, 0],
+                }
+        ]
+    if blue_potions_available.num_potions > 0:
+         return [
+                {
+                    "sku": blue_potions_available.sku,
+                    "name": "blue potion",
+                    "quantity": blue_potions_available.num_potions,
+                    "price": blue_potions_available.cost,
+                    "potion_type": [0, 0, 100, 0],
+                }
+        ]
