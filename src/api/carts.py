@@ -109,7 +109,7 @@ class CartItem(BaseModel):
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
     with db.engine.begin() as connection:
-        connection.execute(sqlalchemy.text(f"UPDATE cart SET quantity = {cart_item.quantity} WHERE id = {cart_id}"))
+        connection.execute(sqlalchemy.text(f"UPDATE cart SET quantity = {cart_item.quantity} WHERE cart_id = {cart_id}"))
 
     return "OK"
 
@@ -121,7 +121,7 @@ class CartCheckout(BaseModel):
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
     with db.engine.begin() as connection:
-        inventory = connection.execute(sqlalchemy.text(f"SELECT quantity,payment FROM cart WHERE id = {cart_id};"))
+        inventory = connection.execute(sqlalchemy.text(f"SELECT quantity,payment FROM cart WHERE cart_id = {cart_id};"))
         cart_checkout = inventory.fetchone()
         #connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_potions = num_green_potions - {cart_checkout.payment//50}"))
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold + {cart_checkout.payment}"))
