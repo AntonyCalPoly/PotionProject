@@ -20,12 +20,29 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     """ """
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
 
-    with db.engine.begin() as connection:
+    green_potions_mixed = 0
+    red_potions_mixed = 0
+    blue_potions_mixed = 0
 
-        for potion in potions_delivered:
-            connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_ml = num_green_ml - {potion.quantity * 100}"))
-            connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_potions = num_green_potions + {potion.quantity}"))
+    for potion in potions_delivered:
+        if potion.potion_type[1] == 100:
+            green_potions_mixed += potion.quantity
+        if potion.potion_type[0] == 100:
+            red_potions_mixed += potion.quantity
+        if potion.potion_type[2] == 100:
+            blue_potions_mixed += potion.quantity
+
+
+    with db.engine.begin() as connection:
+        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_potions = num_potions + {green_potions_mixed} WHERE sku = 'GREEN_POTION_0';"))
+        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = num_ml - {green_potions_mixed*100} WHERE sku = 'GREEN_POTION_0';"))
+
+        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_potions = num_potions + {red_potions_mixed} WHERE sku = 'GREEN_POTION_0';"))
+        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = num_ml - {red_potions_mixed*100} WHERE sku = 'GREEN_POTION_0';"))
     
+        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_potions = num_potions + {blue_potions_mixed} WHERE sku = 'GREEN_POTION_0';"))
+        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = num_ml - {blue_potions_mixed*100} WHERE sku = 'GREEN_POTION_0';"))
+
     return "OK"
 
 @router.post("/plan")
@@ -41,35 +58,41 @@ def get_bottle_plan():
     # Initial logic: bottle all barrels into red potions.
 
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory")).first()[0]
-        quantity = result // 100
+        ml_quantity = connection.execute(sqlalchemy.text("SELECT sku,num_ml FROM global_inventory")).fetchall()
+        
+    for entry in ml_quantity:
+        if entry.sku == "GREEN_POTION_0":
+            green_ml = entry.num_ml
+        if entry.sku == "RED_POTION_0":
+            red_ml = entry.num_ml
+        if entry.sku == "BLUE_POTION_0":
+            blue_ml = entry.num_ml
+        
+    green_potions_mixed = green_ml // 100
+    red_potions_mixed = red_ml // 100
+    blue_potions_mixed = blue_ml // 100
 
-    if quantity > 0:
+
+    if (green_potions_mixed > 0):
         return [
-                {
-                    "potion_type": [0, 100, 0, 0],
-                    "quantity": quantity,
-                }
+            {
+                "potion_type": [0,100,0,0],
+                "quantity": green_potions_mixed,
+            }
         ]
-    else:
-        return  []
-    
-    '''
-    with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory"))
-        result = result.fetchone()
-        quantity = int(result // 100)
-
-    if quantity > 0:
+    if (red_potions_mixed > 0):
         return [
-                {
-                    "potion_type": [0, 100, 0, 0],
-                    "quantity": quantity,
-                }
+            {
+                "potion_type": [100,0,0,0],
+                "quantity": red_potions_mixed,
+            }
         ]
-    else:
-        return  []
-    '''
-
+    if (blue_potions_mixed > 0):
+        return [
+            {
+                "potion_type": [0,0,100,0],
+                "quantity": blue_potions_mixed,
+            }
+        ]
 if __name__ == "__main__":
     print(get_bottle_plan())
