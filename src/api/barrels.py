@@ -48,14 +48,37 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         for barrel in wholesale_catalog:
             if barrel.sku == "SMALL_GREEN_BARREL" :
                 cost = barrel.price
-        if green_pots < 10 and gold >= barrel.price :
+        if green_pots < 10 and gold >= cost :
             return [
                 {
                     "sku": "SMALL_GREEN_BARREL",
                     "quantity": 1,
                 }
             ]
+    
+        '''
+            if barrel.sku == "SMALL_RED_BARREL" :
+                cost = barrel.price
+        if green_pots < 10 and gold >= cost :
+            return [
+                {
+                    "sku": "SMALL_RED_BARREL",
+                    "quantity": 1,
+                }
+            ]
+
+        for barrel in wholesale_catalog:
+            if barrel.sku == "SMALL_BLUE_BARREL" :
+                cost = barrel.price
+        if green_pots < 10 and gold >= cost :
+            return [
+                {
+                    "sku": "SMALL_BLUE_BARREL",
+                    "quantity": 1,
+                }
+            ]
         return []
+        '''
     
     '''
     with db.engine.begin() as connection:
