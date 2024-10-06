@@ -109,7 +109,9 @@ class CartItem(BaseModel):
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
     with db.engine.begin() as connection:
-        connection.execute(sqlalchemy.text(f"UPDATE cart SET quantity = {cart_item.quantity} WHERE cart_id = {cart_id}"))
+        price_of_potions = connection.execute(sqlalchemy.text(f"SELECT cost FROM global_inventory WHERE sku = '{item_sku}';")).fetchone()
+        connection.execute(sqlalchemy.text(f"UPDATE cart SET quantity = {cart_item.quantity}, payment = payment + {cart_item.quantity * price_of_potions.price} WHERE cart_id = {cart_id};"))
+        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_potions = num_potions - {cart_item.quantity} WHERE sku = '{item_sku}';"))
 
     return "OK"
 
@@ -122,8 +124,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
     with db.engine.begin() as connection:
         inventory = connection.execute(sqlalchemy.text(f"SELECT quantity,payment FROM cart WHERE cart_id = {cart_id};"))
-        cart_checkout = inventory.fetchone()
-        #connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_potions = num_green_potions - {cart_checkout.payment//50}"))
-        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold + {cart_checkout.payment}"))
+        inventory_checkout = inventory.fetchone()
+        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold + {inventory_checkout.payment}"))
 
-    return {"total_potions_bought": {cart_checkout.quantity}, "total_gold_paid": {cart_checkout.payment}}
+    return {"total_potions_bought": {inventory_checkout.quantity}, "total_gold_paid": {inventory_checkout.payment}}
