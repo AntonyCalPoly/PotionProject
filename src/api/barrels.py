@@ -38,6 +38,57 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
     print(wholesale_catalog)
 
+    with db.engine.begin() as connection:
+        inventory = connection.execute(sqlalchemy.text("SELECT num_potions, sku, gold FROM global_inventory")).fetchall()
+
+    potion_counts = {
+        "GREEN_POTION_0": 0,
+        "RED_POTION_0": 0,
+        "BLUE_POTION_0": 0
+    }
+
+    gold = inventory[0].gold
+
+
+    for entry in inventory:
+        if entry.sku in potion_counts:
+            potion_counts[entry.sku] = entry.num_potions
+
+    barrels_needed = {
+        "SMALL_GREEN_BARREL": 0,
+        "SMALL_RED_BARREL": 0,
+        "SMALL_BLUE_BARREL": 0
+    }
+
+    for barrel in wholesale_catalog:
+        if barrel.price <= gold:
+            if barrel.sku == "SMALL_GREEN_BARREL" and potion_counts["GREEN_POTION_0"] <= 10:
+                barrels_needed["SMALL_GREEN_BARREL"] += 1
+                gold -= barrel.price
+            elif barrel.sku == "SMALL_RED_BARREL" and potion_counts["RED_POTION_0"] <= 10:
+                barrels_needed["SMALL_RED_BARREL"] += 1
+                gold -= barrel.price
+            elif barrel.sku == "SMALL_BLUE_BARREL" and potion_counts["BLUE_POTION_0"] <= 10:
+                barrels_needed["SMALL_BLUE_BARREL"] += 1
+                gold -= barrel.price
+
+    purchase_plan = [
+        {"sku": sku, "quantity": quantity}
+        for sku, quantity in barrels_needed.items() if quantity > 0
+    ]
+
+    return purchase_plan
+
+
+
+
+
+
+
+
+
+
+'''
     purchase_plan = []
 
     with db.engine.begin() as connection:
@@ -96,7 +147,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
                 "sku": "SMALL_BLUE_BARREL",
                 "quantity": small_blue_barrels_needed,
-                
+
         })
 
     return purchase_plan
+'''
