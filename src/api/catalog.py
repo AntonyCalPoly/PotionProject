@@ -10,40 +10,31 @@ def get_catalog():
     """
     Each unique item combination must have only a single price.
     """
+    
+    potions = [
+        {"sku": "GREEN_POTION_0", "name": "green potion", "potion_type": [0, 100, 0, 0]},
+        {"sku": "RED_POTION_0", "name": "red potion", "potion_type": [100, 0, 0, 0]},
+        {"sku": "BLUE_POTION_0", "name": "blue potion", "potion_type": [0, 0, 100, 0]},
+    ]
+
     with db.engine.begin() as connection:
-        green_potions_available = connection.execute(sqlalchemy.text("SELECT sku,num_potions,cost FROM global_inventory WHERE sku = 'GREEN_POTION_0';")).fetchone()
-        
-        red_potions_available = connection.execute(sqlalchemy.text("SELECT sku,num_potions,cost FROM global_inventory WHERE sku = 'RED_POTION_0';")).fetchone()
+        potion_skus = [potion['sku'] for potion in potions]
+        potion_data = connection.execute(
+            sqlalchemy.text("SELECT sku, num_potions, cost FROM global_inventory WHERE sku = ANY(:sku_list)"),
+            {"sku_list": potion_skus}
+        ).fetchall()
 
-        blue_potions_available = connection.execute(sqlalchemy.text("SELECT sku,num_potions,cost FROM global_inventory WHERE sku = 'BLUE_POTION_0';")).fetchone()
+    available_potions = {entry.sku: entry for entry in potion_data}
 
-    if green_potions_available.num_potions > 0:
-         return [
-                {
-                    "sku": green_potions_available.sku,
-                    "name": "green potion",
-                    "quantity": green_potions_available.num_potions,
-                    "price": green_potions_available.cost,
-                    "potion_type": [0, 100, 0, 0],
-                }
-        ]
-    if red_potions_available.num_potions > 0:
-         return [
-                {
-                    "sku": red_potions_available.sku,
-                    "name": "red potion",
-                    "quantity": red_potions_available.num_potions,
-                    "price": red_potions_available.cost,
-                    "potion_type": [100, 0, 0, 0],
-                }
-        ]
-    if blue_potions_available.num_potions > 0:
-         return [
-                {
-                    "sku": blue_potions_available.sku,
-                    "name": "blue potion",
-                    "quantity": blue_potions_available.num_potions,
-                    "price": blue_potions_available.cost,
-                    "potion_type": [0, 0, 100, 0],
-                }
-        ]
+    for potion in potions:
+        available = available_potions.get(potion["sku"])
+        if available and available.num_potions > 0:
+            return [{
+                "sku": available.sku,
+                "name": potion["name"],
+                "quantity": available.num_potions,
+                "price": available.cost,
+                "potion_type": potion["potion_type"],
+            }]
+
+    return []
