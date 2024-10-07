@@ -77,26 +77,26 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     
     if (small_green_barrels_needed > 0):
         purchase_plan.append({
-            {
+
                 "sku": "SMALL_GREEN_BARREL",
                 "quantity": small_green_barrels_needed,
-            }
+
         })
     
     if (small_red_barrels_needed > 0):
         purchase_plan.append({
-            {
+
                 "sku": "SMALL_RED_BARREL",
                 "quantity": small_red_barrels_needed,
-            }
+
         })
     
     if (small_blue_barrels_needed > 0):
         purchase_plan.append({
-            {
+
                 "sku": "SMALL_BLUE_BARREL",
                 "quantity": small_blue_barrels_needed,
-            }
+                
         })
 
     return purchase_plan

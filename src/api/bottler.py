@@ -75,24 +75,24 @@ def get_bottle_plan():
 
     if (green_potions_mixed > 0):
         bottler_plan.append({
-            {
+            
                 "potion_type": [0,100,0,0],
                 "quantity": green_potions_mixed,
-            }
+            
         })
     if (red_potions_mixed > 0):
         bottler_plan.append({
-            {
+            
                 "potion_type": [100,0,0,0],
                 "quantity": red_potions_mixed,
-            }
+            
         })
     if (blue_potions_mixed > 0):
         bottler_plan.append({
-            {
+            
                 "potion_type": [0,0,100,0],
                 "quantity": blue_potions_mixed,
-            }
+            
         })
 
     return bottler_plan
