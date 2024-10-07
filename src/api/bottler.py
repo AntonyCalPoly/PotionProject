@@ -21,8 +21,8 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
 
     
-    green_potion_mix = 0,
-    red_potion_mix = 0,
+    green_potion_mix = 0
+    red_potion_mix = 0
     blue_potion_mix = 0
     
 
@@ -89,7 +89,10 @@ def get_bottle_plan():
                 "quantity": quantity,
             })
 
+
     return bottler_plan
+
+    
 
 if __name__ == "__main__":
     print(get_bottle_plan())
