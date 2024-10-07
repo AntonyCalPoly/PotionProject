@@ -38,11 +38,11 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_potions = num_potions + {green_potion_mix} WHERE sku = 'GREEN_POTION_0';"))
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = num_ml - {green_potion_mix*100} WHERE sku = 'GREEN_POTION_0';"))
                 
-        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_potions = num_potions + {red_potion_mix} WHERE sku = 'GREEN_POTION_0';"))
-        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = num_ml - {red_potion_mix*100} WHERE sku = 'GREEN_POTION_0';"))
+        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_potions = num_potions + {red_potion_mix} WHERE sku = 'RED_POTION_0';"))
+        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = num_ml - {red_potion_mix*100} WHERE sku = 'RED_POTION_0';"))
 
-        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_potions = num_potions + {blue_potion_mix} WHERE sku = 'GREEN_POTION_0';"))
-        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = num_ml - {blue_potion_mix*100} WHERE sku = 'GREEN_POTION_0';"))
+        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_potions = num_potions + {blue_potion_mix} WHERE sku = 'BLUE_POTION_0';"))
+        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = num_ml - {blue_potion_mix*100} WHERE sku = 'BLUE_POTION_0';"))
 
     return "OK"
 
