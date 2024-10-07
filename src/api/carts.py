@@ -110,7 +110,7 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
     with db.engine.begin() as connection:
         price_of_potions = connection.execute(sqlalchemy.text(f"SELECT cost FROM global_inventory WHERE sku = '{item_sku}';")).fetchone()
-        connection.execute(sqlalchemy.text(f"UPDATE cart SET quantity = {cart_item.quantity}, payment = payment + {cart_item.quantity * price_of_potions.price} WHERE cart_id = {cart_id};"))
+        connection.execute(sqlalchemy.text(f"UPDATE cart SET quantity = {cart_item.quantity}, payment = payment + {cart_item.quantity * price_of_potions.cost} WHERE cart_id = {cart_id};"))
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_potions = num_potions - {cart_item.quantity} WHERE sku = '{item_sku}';"))
 
     return "OK"
