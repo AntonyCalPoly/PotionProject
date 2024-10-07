@@ -38,6 +38,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
     print(wholesale_catalog)
 
+    purchase_plan = []
+
     with db.engine.begin() as connection:
         inventory = connection.execute(sqlalchemy.text("SELECT num_potions, sku, gold FROM global_inventory")).fetchall()
 
@@ -74,25 +76,27 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             gold -= barrel.price
     
     if (small_green_barrels_needed > 0):
-        return [
+        purchase_plan.append({
             {
                 "sku": "SMALL_GREEN_BARREL",
                 "quantity": small_green_barrels_needed,
             }
-        ]
+        })
     
     if (small_red_barrels_needed > 0):
-        return [
+        purchase_plan.append({
             {
                 "sku": "SMALL_RED_BARREL",
                 "quantity": small_red_barrels_needed,
             }
-        ]
+        })
     
     if (small_blue_barrels_needed > 0):
-        return [
+        purchase_plan.append({
             {
                 "sku": "SMALL_BLUE_BARREL",
                 "quantity": small_blue_barrels_needed,
             }
-        ]
+        })
+
+    return purchase_plan
