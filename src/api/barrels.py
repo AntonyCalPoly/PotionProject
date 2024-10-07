@@ -24,11 +24,32 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
 
+    green_barrels_received = 0
+    red_barrels_received = 0
+    blue_barrels_received = 0
+    tot_gold = 0
+
+    for barrel in barrels_delivered:
+        if barrel.sku == "SMALL_GREEN_BARREL":
+            green_barrels_receied += barrel.quantity * barrel.ml_per_barrel 
+            tot_gold += barrel.price * barrel.quantity
+        if barrel.sku == "SMALL_RED_BARREL":
+            red_barrels_receied += barrel.quantity * barrel.ml_per_barrel 
+            tot_gold += barrel.price * barrel.quantity
+        if barrel.sku == "SMALL_BLUE_BARREL":
+            blue_barrels_receied += barrel.quantity * barrel.ml_per_barrel 
+            tot_gold += barrel.price * barrel.quantity
+
+
     with db.engine.begin() as connection:
-        for barrel in barrels_delivered:
-            num_mls = connection.execute(sqlalchemy.text("SELECT num_ml FROM global_inventory")).scalar()
-            connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = ({num_mls + barrel.ml_per_barrel * barrel.quantity})"))
-            connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold - ({barrel.price * barrel.quantity})"))
+            connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = ({green_barrels_received} WHERE sku = 'GREEN_POTION_0')"))
+            connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold - ({tot_gold} WHERE sku = 'GREEN_POTION_0')"))
+
+            connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = ({red_barrels_received} WHERE sku = 'RED_POTION_0')"))
+            connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold - ({tot_gold} WHERE sku = 'RED_POTION_0')"))
+
+            connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = ({blue_barrels_received} WHERE sku = 'BLUE_POTION_0')"))
+            connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold - ({tot_gold} WHERE sku = 'BLUE_POTION_0')"))
 
     return "OK"
 
