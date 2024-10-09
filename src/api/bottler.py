@@ -20,16 +20,22 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     """ """
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
 
+    #with db.engine.begin() as connection:
+        #green_potion_mix = connection.execute(sqlalchemy.text("SELECT num_potions FROM global_inventory WHERE sku = 'GREEN_POTION_0';")).fetchone()
+        #red_potion_mix = connection.execute(sqlalchemy.text("SELECT num_potions FROM global_inventory WHERE sku = 'RED_POTION_0';")).fetchone()
+        #blue_potion_mix = connection.execute(sqlalchemy.text("SELECT num_potions FROM global_inventory WHERE sku = 'BLUE_POTION_0';")).fetchone()
+
+
     green_potion_mix = 0
     red_potion_mix = 0
     blue_potion_mix = 0
 
     for potion in potions_delivered:
-        if potion.potion_type[1] == 1:
+        if potion.potion_type[1] == 100:
             green_potion_mix += potion.quantity
-        if potion.potion_type[0] == 1:
+        if potion.potion_type[0] == 100:
             red_potion_mix += potion.quantity
-        if potion.potion_type[2] == 1:
+        if potion.potion_type[2] == 100:
             blue_potion_mix += potion.quantity
 
     with db.engine.begin() as connection:
