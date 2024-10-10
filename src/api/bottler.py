@@ -20,16 +20,12 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     """ """
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
 
-    green_potion_mix = 0
-    red_potion_mix = 0
-    blue_potion_mix = 0
-
     for potion in potions_delivered:
-        if potion.potion_type[1] == 100:
+        if potion.potion_type[1] == 1:
             green_potion_mix += potion.quantity
-        if potion.potion_type[0] == 100:
+        if potion.potion_type[0] == 1:
             red_potion_mix += potion.quantity
-        if potion.potion_type[2] == 100:
+        if potion.potion_type[2] == 1:
             blue_potion_mix += potion.quantity
     
     with db.engine.begin() as connection:
