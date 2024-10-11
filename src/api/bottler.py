@@ -25,11 +25,11 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     blue_potion_mix = 0
 
     for potion in potions_delivered:
-        if potion.potion_type[1] == 1:
+        if potion.potion_type[1] == 100:
             green_potion_mix += potion.quantity
-        elif potion.potion_type[0] == 1:
+        elif potion.potion_type[0] == 100:
             red_potion_mix += potion.quantity
-        elif potion.potion_type[2] == 1:
+        elif potion.potion_type[2] == 100:
             blue_potion_mix += potion.quantity
 
 
