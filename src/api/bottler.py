@@ -32,6 +32,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
         elif potion.potion_type[2] == 100:
             blue_potion_mix += potion.quantity
 
+    #test
 
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_potions = num_potions + {green_potion_mix} WHERE sku = 'GREEN_POTION_0';"))
