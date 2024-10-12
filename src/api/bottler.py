@@ -71,8 +71,6 @@ def get_bottle_plan():
         "BLUE_POTION_0": ml_quantities.get("BLUE_POTION_0", 0) // 100
     }
 
-    print(potion_types)
-
     for potion_sku, quantity in potion_types.items():
         if quantity > 0:
             if potion_sku == "GREEN_POTION_0":
