@@ -112,8 +112,12 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
         price_of_potions = connection.execute(sqlalchemy.text(f"SELECT cost, num_potions FROM global_inventory WHERE sku = '{item_sku}';")).fetchone()
         current_cart = connection.execute(sqlalchemy.text(f"SELECT quantity,payment FROM cart WHERE cart_id = {cart_id};")).fetchone()
         
-        total_quantity = cart_item.quantity if current_cart.quantity == 0 else current_cart.quantity + cart_item.quantity
-        
+        if current_cart is None:
+
+            total_quantity = cart_item.quantity
+        else:
+            total_quantity = cart_item.quantity if current_cart.quantity == 0 else current_cart.quantity + cart_item.quantity
+
         new_payment = total_quantity * 50 
 
         connection.execute(sqlalchemy.text(f"UPDATE cart SET quantity = {total_quantity}, payment = {new_payment} WHERE cart_id = {cart_id};"))
