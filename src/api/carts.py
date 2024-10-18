@@ -125,7 +125,8 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         inventory = connection.execute(sqlalchemy.text("SELECT quantity, payment FROM cart WHERE cart_id = :cart_id"), {"cart_id": cart_id})
         cart_checkout = inventory.fetchone()
         quantity, payment = cart_checkout
-        payment = payment[0]
+        if isinstance(payment, list):
+            payment = payment[0]
         connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold + :payment"), {"payment": payment})
 
     return {"total_potions_bought": quantity, "total_gold_paid": payment}
