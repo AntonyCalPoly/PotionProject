@@ -27,6 +27,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     green_barrels_received = 0
     red_barrels_received = 0
     blue_barrels_received = 0
+    #dark_barrels_received = 0
     tot_gold = 0
 
     for barrel in barrels_delivered:
@@ -39,6 +40,9 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
         if barrel.sku == "SMALL_BLUE_BARREL":
             blue_barrels_received += barrel.quantity * barrel.ml_per_barrel 
             tot_gold += barrel.price * barrel.quantity
+        #if barrel.sku == "SMALL_DARK_BARREL":
+            #dark_barrels_received += barrel.quantity * barrel.ml_per_barrel 
+            #tot_gold += barrel.price * barrel.quantity
 
 
     with db.engine.begin() as connection:
@@ -48,6 +52,8 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 
             connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = num_ml + {blue_barrels_received} WHERE sku = 'BLUE_POTION_0';"))
             
+            #connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = num_ml + {dark_barrels_received} WHERE sku = 'DARK_POTION_0';"))
+
             connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold - ({tot_gold})"))
 
     return "OK"
@@ -64,7 +70,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     potion_counts = {
         "GREEN_POTION_0": 0,
         "RED_POTION_0": 0,
-        "BLUE_POTION_0": 0
+        "BLUE_POTION_0": 0,
+        #"DARK_POTION_0"
     }
 
     gold = inventory[0].gold
@@ -77,7 +84,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     barrels_needed = {
         "SMALL_GREEN_BARREL": 0,
         "SMALL_RED_BARREL": 0,
-        "SMALL_BLUE_BARREL": 0
+        "SMALL_BLUE_BARREL": 0,
+        #"SMALL_DARK_BARREL"
     }
 
     for barrel in wholesale_catalog:
@@ -91,6 +99,9 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             elif barrel.sku == "SMALL_BLUE_BARREL" and potion_counts["BLUE_POTION_0"] <= 10:
                 barrels_needed["SMALL_BLUE_BARREL"] += 1
                 gold -= barrel.price
+            #elif barrel.sku == "SMALL_DARK_BARREL" and potion_counts["DARK_POTION_0"] <= 10:
+                #barrels_needed["SMALL_DARK_BARREL"] += 1
+                #gold -= barrel.price
 
     purchase_plan = [
         {"sku": sku, "quantity": quantity}

@@ -23,6 +23,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     green_potion_mix = 0
     red_potion_mix = 0
     blue_potion_mix = 0
+    #dark_potion_mix = 0
 
     for potion in potions_delivered:
         if potion.potion_type[1] == 100:
@@ -31,6 +32,8 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
             red_potion_mix += potion.quantity
         elif potion.potion_type[2] == 100:
             blue_potion_mix += potion.quantity
+        #elif potion.potion_type[3] == 100:
+            #dark_potion_mix += potion.quantity
 
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_potions = num_potions + {green_potion_mix} WHERE sku = 'GREEN_POTION_0';"))
@@ -41,6 +44,9 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
         
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_potions = num_potions + {blue_potion_mix} WHERE sku = 'BLUE_POTION_0';"))
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = num_ml - {blue_potion_mix*100} WHERE sku = 'BLUE_POTION_0';"))
+
+        #connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_potions = num_potions + {dark_potion_mix} WHERE sku = 'DARK_POTION_0';"))
+        #connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = num_ml - {dark_potion_mix*100} WHERE sku = 'DARK_POTION_0';"))
 
     return "OK"
 
@@ -68,7 +74,8 @@ def get_bottle_plan():
     potion_types = {
         "GREEN_POTION_0": ml_quantities.get("GREEN_POTION_0", 0) // 100,
         "RED_POTION_0": ml_quantities.get("RED_POTION_0", 0) // 100,
-        "BLUE_POTION_0": ml_quantities.get("BLUE_POTION_0", 0) // 100
+        "BLUE_POTION_0": ml_quantities.get("BLUE_POTION_0", 0) // 100,
+        #"DARK_POTION_0": ml_quantities.get("DARK_POTION_0", 0) // 100"
     }
 
     for potion_sku, quantity in potion_types.items():
@@ -79,6 +86,8 @@ def get_bottle_plan():
                 potion_type = [100, 0, 0, 0]
             elif potion_sku == "BLUE_POTION_0":
                 potion_type = [0, 0, 100, 0]
+            #elif potion_sku == "DARK_POTION_0":
+                #potion_type = [0, 0, 0, 100]
 
             bottler_plan.append({
                 "potion_type": potion_type,

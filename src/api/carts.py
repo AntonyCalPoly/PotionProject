@@ -123,8 +123,9 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
     with db.engine.begin() as connection:
         inventory = connection.execute(sqlalchemy.text("SELECT quantity, payment FROM cart WHERE cart_id = :cart_id"), {"cart_id": cart_id})
-        cart_checkout = inventory.fetchone()
-        quantity, payment = cart_checkout
+        checkout = inventory.fetchone()
+        quantity = checkout.quantity
+        payment = checkout.payment
         if isinstance(payment, list):
             payment = payment[0]
         connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold + :payment"), {"payment": payment})
