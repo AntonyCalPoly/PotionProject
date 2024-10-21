@@ -122,9 +122,9 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     with db.engine.begin() as connection:
         potions_bought = connection.execute(sqlalchemy.text(f"SELECT potion_type, quantity FROM cart_items WHERE cart_id = {cart_id};")).fetchall()
        
-        checkout = connection.execute(sqlalchemy.text(f"SELECT quantity AS quantity,payment FROM cart WHERE id = {cart_id};")).fetchone()
+        checkout = connection.execute(sqlalchemy.text(f"SELECT quantity AS quantity,payment FROM cart WHERE cart_id = {cart_id};")).fetchone()
 
-        connection.execute(sqlalchemy.text(f"INSERT INTO global_inventory (gold) VALUES ({checkout.payment});"))
+        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold + {checkout.payment} WHERE id = 1;"))
 
         for potion in potions_bought:
             connection.execute(sqlalchemy.text(f"UPDATE custom_potions SET num_potions = num_potions - {potion.quantity} WHERE id = {potion.potion_type};"))
