@@ -23,7 +23,23 @@ class Barrel(BaseModel):
 def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
-
+    for barrel in barrels_delivered:
+         
+        with db.engine.begin() as connection:
+            connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET red_ml = red_ml + :red_ml, green_ml = green_ml + :green_ml, blue_ml = blue_ml + :blue_ml, dark_ml = dark_ml + :dark_ml, gold = gold - :price;"),
+             {
+                "red_ml": barrel.ml_per_barrel * barrel.quantity * barrel.potion_type[0],
+                "green_ml": barrel.ml_per_barrel * barrel.quantity * barrel.potion_type[1],
+                "blue_ml": barrel.ml_per_barrel * barrel.quantity * barrel.potion_type[2],
+                "dark_ml": barrel.ml_per_barrel * barrel.quantity * barrel.potion_type[3],
+                "price": barrel.price * barrel.quantity
+            })
+    
+    
+    
+    
+    
+    '''
     red_barrels_received = 0
     green_barrels_received = 0
     blue_barrels_received = 0
@@ -55,7 +71,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
             connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET dark_ml = dark_ml + {dark_barrels_received};"))
 
             connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold - ({tot_gold})"))
-
+'''
     return "OK"
 
 # Gets called once a day
@@ -68,24 +84,25 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         inventory = connection.execute(sqlalchemy.text("SELECT red_ml, green_ml, blue_ml, dark_ml, gold FROM global_inventory")).fetchone()
         red_ml, green_ml, blue_ml, dark_ml, gold = inventory
         purchase_plan = []
-
+        
         for barrel in wholesale_catalog:
+
             current_ml = (
             red_ml * barrel.potion_type[0] +
             green_ml * barrel.potion_type[1] +
             blue_ml * barrel.potion_type[2] +
             dark_ml * barrel.potion_type[3]
         )
-
-        if current_ml < 500 and gold >= barrel.price:
-            purchase_plan.append({
-                "sku": barrel.sku,
-                "quantity": 1
-            })
-            gold -= barrel.price
-            red_ml += barrel.ml_per_barrel * barrel.potion_type[0]
-            green_ml += barrel.ml_per_barrel * barrel.potion_type[1]
-            blue_ml += barrel.ml_per_barrel * barrel.potion_type[2]
-            dark_ml += barrel.ml_per_barrel * barrel.potion_type[3]
-    
+            
+            if current_ml < 500 and gold >= barrel.price:
+                purchase_plan.append({
+                    "sku": barrel.sku,
+                    "quantity": 1
+                })
+                gold -= barrel.price
+                red_ml += barrel.ml_per_barrel * barrel.potion_type[0]
+                green_ml += barrel.ml_per_barrel * barrel.potion_type[1]
+                blue_ml += barrel.ml_per_barrel * barrel.potion_type[2]
+                dark_ml += barrel.ml_per_barrel * barrel.potion_type[3]
+                    
     return purchase_plan
