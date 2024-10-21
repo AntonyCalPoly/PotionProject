@@ -25,10 +25,10 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
            
             custom_potion = connection.execute(sqlalchemy.text("SELECT id FROM custom_potions where percent_red = :red_ml AND percent_green = :green_ml AND percent_blue = :blue_ml AND percent_dark = :dark_ml;"),
                 {
-                "red_ml": potion.potion_type[0] * 100,
-                "green_ml": potion.potion_type[1] * 100,
-                "blue_ml": potion.potion_type[2] * 100,
-                "dark_ml": potion.potion_type[3] * 100
+                "red_ml": potion.potion_type[0],
+                "green_ml": potion.potion_type[1],
+                "blue_ml": potion.potion_type[2],
+                "dark_ml": potion.potion_type[3]
             }).fetchone()       
            
             if custom_potion:
@@ -37,10 +37,10 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                 
                 connection.execute(sqlalchemy.text("UPDATE global_inventory SET red_ml = red_ml - :red_ml, green_ml = green_ml - :green_ml, blue_ml = blue_ml - :blue_ml, dark_ml = dark_ml - :dark_ml;"),
                     {
-                    "red_ml": potion.potion_type[0] * potion.quantity * 100,
-                    "green_ml": potion.potion_type[1] * potion.quantity * 100,
-                    "blue_ml": potion.potion_type[2] * potion.quantity * 100,
-                    "dark_ml": potion.potion_type[3] * potion.quantity * 100
+                    "red_ml": potion.potion_type[0] * potion.quantity,
+                    "green_ml": potion.potion_type[1] * potion.quantity,
+                    "blue_ml": potion.potion_type[2] * potion.quantity,
+                    "dark_ml": potion.potion_type[3] * potion.quantity
                 })                         
             
     return "OK"
