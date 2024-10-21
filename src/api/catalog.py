@@ -10,31 +10,25 @@ def get_catalog():
     """
     Each unique item combination must have only a single price.
     """
-    
-    potions = [
-        {"sku": "GREEN_POTION_0", "name": "green potion", "potion_type": [0, 100, 0, 0]},
-        {"sku": "RED_POTION_0", "name": "red potion", "potion_type": [100, 0, 0, 0]},
-        {"sku": "BLUE_POTION_0", "name": "blue potion", "potion_type": [0, 0, 100, 0]},
-    ]
+    catalog = []
 
     with db.engine.begin() as connection:
-        potion_skus = [potion['sku'] for potion in potions]
-        potion_data = connection.execute(
-            sqlalchemy.text("SELECT sku, num_potions, cost FROM global_inventory WHERE sku = ANY(:sku_list)"),
-            {"sku_list": potion_skus}
-        ).fetchall()
+         get_potions = connection.execute(sqlalchemy.text("SELECT id, num_potions, price, percent_red, percent_green, percent_blue, percent_dark, sku FROM custom_potions ORDER BY id DESC;")).fetchall()
+       
+    count_of_skus = 0
 
-    available_potions = {entry.sku: entry for entry in potion_data}
-
-    for potion in potions:
-        available = available_potions.get(potion["sku"])
-        if available and available.num_potions > 0:
-            return [{
-                "sku": available.sku,
-                "name": potion["name"],
-                "quantity": available.num_potions,
-                "price": available.cost,
-                "potion_type": potion["potion_type"],
-            }]
-
-    return []
+    for potion in get_potions:
+        print(potion)
+        if count_of_skus == 6:
+            break
+        if potion.num_potions > 0:
+            count_of_skus += 1
+            catalog.append({
+                "sku": potion.id,
+                "name": potion.sku,
+                "quantity": potion.num_potions,
+                "price": potion.price,
+                "potion_type": [potion.percent_red, potion.percent_green, potion.percent_blue, potion.percent_dark],
+            })
+    
+    return catalog

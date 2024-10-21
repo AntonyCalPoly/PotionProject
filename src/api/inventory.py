@@ -15,16 +15,11 @@ router = APIRouter(
 def get_inventory():
     """ """
     with db.engine.begin() as connection:
-        in_inventory = connection.execute(sqlalchemy.text("SELECT num_potions, num_ml, gold, sku FROM global_inventory;")).fetchall()
-        tot_potions = 0
-        tot_ml = 0
-        tot_gold = in_inventory[0].gold
-
-        for entry in in_inventory:
-            tot_potions = entry.num_potions
-            tot_ml = entry.num_ml
-
-    return {"total_potions": tot_potions, "total_ml": tot_ml, "total_gold": tot_gold}
+        gold_in_inventory = connection.execute(sqlalchemy.text("SELECT SUM(gold) AS total_gold_amount FROM global_inventory;")).fetchone()
+        amount_potions = connection.execute(sqlalchemy.text("SELECT SUM(num_potions) AS total_potion_amount FROM custom_potions;")).fetchone()
+        ml_amount = connection.execute(sqlalchemy.text("SELECT SUM(red_ml + green_ml + blue_ml + dark_ml) AS total_ml_amount from global_inventory")).fetchone()
+       
+    return {"number_of_potions": amount_potions.total_potion_amount, "ml_in_barrels": ml_amount.total_ml_amount, "gold":gold_in_inventory.total_gold_amount}
 
 # Gets called once a day
 @router.post("/plan")

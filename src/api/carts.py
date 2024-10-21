@@ -89,7 +89,6 @@ def post_visits(visit_id: int, customers: list[Customer]):
 def create_cart(new_cart: Customer):
     
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text(f"SELECT customer_name, character_class, level, cart_id, quantity, payment FROM cart WHERE customer_name = '{new_cart.customer_name}' and character_class = '{new_cart.character_class}' and level = '{new_cart.level}';")).fetchall()
         update_id  = connection.execute(sqlalchemy.text("SELECT cart_id FROM cart ORDER BY cart_id DESC")).fetchone()
         cart_id = (update_id[0]+1)
         connection.execute(sqlalchemy.text(f"INSERT INTO cart (customer_name, character_class, level, cart_id, quantity, payment) VALUES ('{new_cart.customer_name}','{new_cart.character_class}',{new_cart.level},{cart_id},{0},{0});"))
@@ -104,13 +103,12 @@ class CartItem(BaseModel):
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
     with db.engine.begin() as connection:
-        price_of_potions = connection.execute(sqlalchemy.text(f"SELECT cost, num_potions FROM global_inventory WHERE sku = '{item_sku}';")).fetchone()
+        connection.execute(sqlalchemy.text(f"INSERT INTO cart_items (cart_id, potion_type, quantity) VALUES ({cart_id},{item_sku}, {cart_item.quantity});"))
+       
+        price_of_potions = connection.execute(sqlalchemy.text(f"SELECT price FROM custom_potions WHERE id = '{item_sku}';")).fetchone()
         
-        connection.execute(sqlalchemy.text("UPDATE cart SET quantity = :quantity, payment = :payment WHERE cart_id = :cart_id;"),
-                   {"quantity": cart_item.quantity, "payment": cart_item.quantity * price_of_potions.cost, "cart_id": cart_id})
-
-        connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_potions = num_potions - :quantity WHERE sku = :sku"), 
-                   {"quantity": cart_item.quantity, "sku": item_sku})
+        connection.execute(sqlalchemy.text("UPDATE cart SET quantity = :quantity, payment = payment + :payment WHERE cart_id = :cart_id;"),
+                   {"quantity": cart_item.quantity, "payment": cart_item.quantity * price_of_potions.price, "cart_id": cart_id})
 
     return "OK"
 
@@ -122,12 +120,13 @@ class CartCheckout(BaseModel):
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
     with db.engine.begin() as connection:
-        inventory = connection.execute(sqlalchemy.text("SELECT quantity, payment FROM cart WHERE cart_id = :cart_id"), {"cart_id": cart_id})
-        checkout = inventory.fetchone()
-        quantity = checkout.quantity
-        payment = checkout.payment
-        if isinstance(payment, list):
-            payment = payment[0]
-        connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold + :payment"), {"payment": payment})
+        potions_bought = connection.execute(sqlalchemy.text(f"SELECT potion_type, quantity FROM cart_items WHERE cart_id = {cart_id};")).fetchall()
+       
+        checkout = connection.execute(sqlalchemy.text(f"SELECT quantity AS quantity,payment FROM cart WHERE id = {cart_id};")).fetchone()
 
-    return {"total_potions_bought": quantity, "total_gold_paid": payment}
+        connection.execute(sqlalchemy.text(f"INSERT INTO global_inventory (gold) VALUES ({checkout.payment});"))
+
+        for potion in potions_bought:
+            connection.execute(sqlalchemy.text(f"UPDATE custom_potions SET num_potions = num_potions - {potion.quantity} WHERE id = {potion.potion_type};"))
+       
+    return {"total_potions_bought": checkout.quantity, "total_gold_paid": checkout.payment}

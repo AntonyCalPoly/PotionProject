@@ -20,33 +20,27 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     """ """
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
     
-    green_potion_mix = 0
-    red_potion_mix = 0
-    blue_potion_mix = 0
-    #dark_potion_mix = 0
-
-    for potion in potions_delivered:
-        if potion.potion_type[1] == 100:
-            green_potion_mix += potion.quantity
-        elif potion.potion_type[0] == 100:
-            red_potion_mix += potion.quantity
-        elif potion.potion_type[2] == 100:
-            blue_potion_mix += potion.quantity
-        #elif potion.potion_type[3] == 100:
-            #dark_potion_mix += potion.quantity
-
     with db.engine.begin() as connection:
-        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_potions = num_potions + {green_potion_mix} WHERE sku = 'GREEN_POTION_0';"))
-        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = num_ml - {green_potion_mix*100} WHERE sku = 'GREEN_POTION_0';"))
+        for potion in potions_delivered:
+            custom_potions = connection.execute(sqlalchemy.text("SELECT id FROM custom_potions where red_ml = :red_ml AND green_ml = :green_ml AND blue_ml = :blue_ml AND dark_ml = :dark_ml;"),
+                {
+                "red_ml": potion.potion_type[0],
+                "green_ml": potion.potion_type[1],
+                "blue_ml": potion.potion_type[2],
+                "dark_ml": potion.potion_type[3]
+            }).fetchone()       
 
-        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_potions = num_potions + {red_potion_mix} WHERE sku = 'RED_POTION_0';"))
-        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = num_ml - {red_potion_mix*100} WHERE sku = 'RED_POTION_0';"))
-        
-        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_potions = num_potions + {blue_potion_mix} WHERE sku = 'BLUE_POTION_0';"))
-        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = num_ml - {blue_potion_mix*100} WHERE sku = 'BLUE_POTION_0';"))
+            if custom_potions:
+                connection.execute(sqlalchemy.text("UPDATE custom_potions SET num_potions = num_potions + :quantity WHERE id = :id;"),
+                    {"quantity": potion.quantity, "id": custom_potions.id})  
 
-        #connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_potions = num_potions + {dark_potion_mix} WHERE sku = 'DARK_POTION_0';"))
-        #connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_ml = num_ml - {dark_potion_mix*100} WHERE sku = 'DARK_POTION_0';"))
+                connection.execute(sqlalchemy.text("UPDATE global_inventory SET red_ml = red_ml - :red_ml, green_ml = green_ml - :green_ml, blue_ml = blue_ml - :blue_ml, dark_ml = dark_ml - :dark_ml;"),
+                    {
+                    "red_ml": potion.potion_type[0] * potion.quantity,
+                    "green_ml": potion.potion_type[1] * potion.quantity,
+                    "blue_ml": potion.potion_type[2] * potion.quantity,
+                    "dark_ml": potion.potion_type[3] * potion.quantity
+                })                         
 
     return "OK"
 
@@ -55,10 +49,6 @@ def get_bottle_plan():
     """
     Go from barrel to bottle.
     """
-    bottler_plan = []
-
-    ml_quantities = {}
-
     # Each bottle has a quantity of what proportion of red, blue, and
     # green potion to add.
     # Expressed in integers from 1 to 100 that must sum up to 100.
@@ -66,35 +56,38 @@ def get_bottle_plan():
     # Initial logic: bottle all barrels into red potions.
 
     with db.engine.begin() as connection:
-        ml_quantity = connection.execute(sqlalchemy.text("SELECT sku, num_ml FROM global_inventory")).fetchall()
+        get_inventory = connection.execute(sqlalchemy.text("SELECT red_ml, green_ml, blue_ml, dark_ml FROM global_inventory;")).fetchone()
 
-    for entry in ml_quantity:
-        ml_quantities[entry.sku] = entry.num_ml
+        get_potions = connection.execute(sqlalchemy.text("SELECT red_ml, green_ml, blue_ml, dark_ml, id FROM custom_potions;")).fetchone()
 
-    potion_types = {
-        "GREEN_POTION_0": ml_quantities.get("GREEN_POTION_0", 0) // 100,
-        "RED_POTION_0": ml_quantities.get("RED_POTION_0", 0) // 100,
-        "BLUE_POTION_0": ml_quantities.get("BLUE_POTION_0", 0) // 100,
-        #"DARK_POTION_0": ml_quantities.get("DARK_POTION_0", 0) // 100"
-    }
+    bottler_plan = []
 
-    for potion_sku, quantity in potion_types.items():
-        if quantity > 0:
-            if potion_sku == "GREEN_POTION_0":
-                potion_type = [0, 100, 0, 0]
-            elif potion_sku == "RED_POTION_0":
-                potion_type = [100, 0, 0, 0]
-            elif potion_sku == "BLUE_POTION_0":
-                potion_type = [0, 0, 100, 0]
-            #elif potion_sku == "DARK_POTION_0":
-                #potion_type = [0, 0, 0, 100]
+    red_ml_left = get_inventory.red_ml
+    green_ml_left = get_inventory.green_ml
+    blue_ml_left = get_inventory.blue_ml
+    dark_ml_left = get_inventory.dark_ml
+    
+    
+    for potion_type in get_potions:
+        max_potions = min(
+            red_ml_left // potion_type.red_ml if potion_type.red_ml > 0 else float('inf'),
+            green_ml_left // potion_type.green_ml if potion_type.green_ml > 0 else float('inf'),
+            blue_ml_left // potion_type.blue_ml if potion_type.blue_ml > 0 else float('inf'),
+            dark_ml_left // potion_type.dark_ml if potion_type.dark_ml > 0 else float('inf'),
+            5 
+        )
 
+        if max_potions > 0:
             bottler_plan.append({
-                "potion_type": potion_type,
-                "quantity": quantity,
+                "potion_type": [potion_type.red_ml, potion_type.green_ml, potion_type.blue_ml, potion_type.dark_ml],
+                "quantity": int(max_potions)
             })
 
-
+            red_ml_left -= potion_type.red_ml * max_potions
+            green_ml_left -= potion_type.green_ml * max_potions
+            blue_ml_left -= potion_type.blue_ml * max_potions
+            dark_ml_left -= potion_type.dark_ml * max_potions
+    
     return bottler_plan
 
     
