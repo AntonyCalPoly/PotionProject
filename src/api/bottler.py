@@ -22,7 +22,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     
     with db.engine.begin() as connection:
         for potion in potions_delivered:
-            custom_potions = connection.execute(sqlalchemy.text("SELECT id FROM custom_potions where red_ml = :red_ml AND green_ml = :green_ml AND blue_ml = :blue_ml AND dark_ml = :dark_ml;"),
+            custom_potions = connection.execute(sqlalchemy.text("SELECT id FROM custom_potions where percent_red = :red_ml AND percent_green = :green_ml AND percent_blue = :blue_ml AND percent_dark = :dark_ml;"),
                 {
                 "red_ml": potion.potion_type[0],
                 "green_ml": potion.potion_type[1],
