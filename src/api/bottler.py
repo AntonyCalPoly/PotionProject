@@ -22,26 +22,27 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     
     with db.engine.begin() as connection:
         for potion in potions_delivered:
-            custom_potions = connection.execute(sqlalchemy.text("SELECT id FROM custom_potions where percent_red = :red_ml AND percent_green = :green_ml AND percent_blue = :blue_ml AND percent_dark = :dark_ml;"),
+           
+            custom_potion = connection.execute(sqlalchemy.text("SELECT id FROM custom_potions where percent_red = :red_ml AND percent_green = :green_ml AND percent_blue = :blue_ml AND percent_dark = :dark_ml;"),
                 {
-                "red_ml": potion.potion_type[0],
-                "green_ml": potion.potion_type[1],
-                "blue_ml": potion.potion_type[2],
-                "dark_ml": potion.potion_type[3]
+                "red_ml": potion.potion_type[0] * 100,
+                "green_ml": potion.potion_type[1] * 100,
+                "blue_ml": potion.potion_type[2] * 100,
+                "dark_ml": potion.potion_type[3] * 100
             }).fetchone()       
-
-            if custom_potions:
+           
+            if custom_potion:
                 connection.execute(sqlalchemy.text("UPDATE custom_potions SET num_potions = num_potions + :quantity WHERE id = :id;"),
-                    {"quantity": potion.quantity, "id": custom_potions.id})  
-
+                    {"quantity": potion.quantity, "id": custom_potion.id})  
+                
                 connection.execute(sqlalchemy.text("UPDATE global_inventory SET red_ml = red_ml - :red_ml, green_ml = green_ml - :green_ml, blue_ml = blue_ml - :blue_ml, dark_ml = dark_ml - :dark_ml;"),
                     {
-                    "red_ml": potion.potion_type[0] * potion.quantity,
-                    "green_ml": potion.potion_type[1] * potion.quantity,
-                    "blue_ml": potion.potion_type[2] * potion.quantity,
-                    "dark_ml": potion.potion_type[3] * potion.quantity
+                    "red_ml": potion.potion_type[0] * potion.quantity * 100,
+                    "green_ml": potion.potion_type[1] * potion.quantity * 100,
+                    "blue_ml": potion.potion_type[2] * potion.quantity * 100,
+                    "dark_ml": potion.potion_type[3] * potion.quantity * 100
                 })                         
-
+            
     return "OK"
 
 @router.post("/plan")
@@ -58,39 +59,39 @@ def get_bottle_plan():
     with db.engine.begin() as connection:
         get_inventory = connection.execute(sqlalchemy.text("SELECT red_ml, green_ml, blue_ml, dark_ml FROM global_inventory;")).fetchone()
 
-        get_potions = connection.execute(sqlalchemy.text("SELECT red_ml, green_ml, blue_ml, dark_ml, id FROM custom_potions;")).fetchone()
+        get_potions = connection.execute(sqlalchemy.text("SELECT percent_red, percent_green, percent_blue, percent_dark, id FROM custom_potions;")).fetchall()
 
     bottler_plan = []
 
-    red_ml_left = get_inventory.red_ml
-    green_ml_left = get_inventory.green_ml
-    blue_ml_left = get_inventory.blue_ml
-    dark_ml_left = get_inventory.dark_ml
-    
-    
+    red_ml_left, green_ml_left, blue_ml_left, dark_ml_left = get_inventory
+
     for potion_type in get_potions:
+        percent_red = potion_type[0]
+        percent_green = potion_type[1]
+        percent_blue = potion_type[2]
+        percent_dark = potion_type[3]
+
         max_potions = min(
-            red_ml_left // potion_type.red_ml if potion_type.red_ml > 0 else float('inf'),
-            green_ml_left // potion_type.green_ml if potion_type.green_ml > 0 else float('inf'),
-            blue_ml_left // potion_type.blue_ml if potion_type.blue_ml > 0 else float('inf'),
-            dark_ml_left // potion_type.dark_ml if potion_type.dark_ml > 0 else float('inf'),
-            5 
+            red_ml_left // percent_red if percent_red > 0 else float('inf'),
+            green_ml_left // percent_green if percent_green > 0 else float('inf'),
+            blue_ml_left // percent_blue if percent_blue > 0 else float('inf'),
+            dark_ml_left // percent_dark if percent_dark > 0 else float('inf'),
+            5  
         )
 
         if max_potions > 0:
             bottler_plan.append({
-                "potion_type": [potion_type.red_ml, potion_type.green_ml, potion_type.blue_ml, potion_type.dark_ml],
+                "potion_type": [percent_red, percent_green, percent_blue, percent_dark],
                 "quantity": int(max_potions)
             })
 
-            red_ml_left -= potion_type.red_ml * max_potions
-            green_ml_left -= potion_type.green_ml * max_potions
-            blue_ml_left -= potion_type.blue_ml * max_potions
-            dark_ml_left -= potion_type.dark_ml * max_potions
-    
+            red_ml_left -= percent_red * max_potions
+            green_ml_left -= percent_green * max_potions
+            blue_ml_left -= percent_blue * max_potions
+            dark_ml_left -= percent_dark * max_potions
+
     return bottler_plan
 
     
-
 if __name__ == "__main__":
     print(get_bottle_plan())
