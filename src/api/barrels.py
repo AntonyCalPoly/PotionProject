@@ -104,5 +104,5 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 green_ml += barrel.ml_per_barrel * barrel.potion_type[1]
                 blue_ml += barrel.ml_per_barrel * barrel.potion_type[2]
                 dark_ml += barrel.ml_per_barrel * barrel.potion_type[3]
-                    
+    print(purchase_plan)           
     return purchase_plan
