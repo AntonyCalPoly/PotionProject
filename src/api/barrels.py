@@ -86,26 +86,27 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     with db.engine.begin() as connection:
         inventory = connection.execute(sqlalchemy.text("SELECT red_ml, green_ml, blue_ml, dark_ml, gold FROM global_inventory")).fetchone()
         red_ml, green_ml, blue_ml, dark_ml, gold = inventory
-        purchase_plan = []
+    
+    purchase_plan = []
         
-        for barrel in wholesale_catalog:
+    for barrel in wholesale_catalog:
 
-            current_ml = (
-            red_ml * barrel.potion_type[0] +
-            green_ml * barrel.potion_type[1] +
-            blue_ml * barrel.potion_type[2] +
-            dark_ml * barrel.potion_type[3]
-        )
-            
-            if current_ml < 500 and gold >= barrel.price:
-                purchase_plan.append({
-                    "sku": barrel.sku,
-                    "quantity": 1
-                })
-                gold -= barrel.price
-                red_ml += barrel.ml_per_barrel * barrel.potion_type[0]
-                green_ml += barrel.ml_per_barrel * barrel.potion_type[1]
-                blue_ml += barrel.ml_per_barrel * barrel.potion_type[2]
-                dark_ml += barrel.ml_per_barrel * barrel.potion_type[3]
+        current_ml = (
+        red_ml * barrel.potion_type[0] +
+        green_ml * barrel.potion_type[1] +
+        blue_ml * barrel.potion_type[2] +
+        dark_ml * barrel.potion_type[3]
+    )
+        
+        if current_ml < 500 and gold >= barrel.price:
+            purchase_plan.append({
+                "sku": barrel.sku,
+                "quantity": 1
+            })
+            gold -= barrel.price
+            red_ml += barrel.ml_per_barrel * barrel.potion_type[0]
+            green_ml += barrel.ml_per_barrel * barrel.potion_type[1]
+            blue_ml += barrel.ml_per_barrel * barrel.potion_type[2]
+            dark_ml += barrel.ml_per_barrel * barrel.potion_type[3]
     print(purchase_plan)           
     return purchase_plan
