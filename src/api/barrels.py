@@ -29,19 +29,19 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     cost = 0
 
     for barrel in barrels_delivered:
-        if barrel.potion_type[0] == 1:
+        if barrel.potion_type[0] == 100:
             red_ml_delivered += barrel.quantity * barrel.ml_per_barrel
             cost += barrel.price * barrel.quantity
             print("red ml: ", red_ml_delivered)
-        elif barrel.potion_type[1] == 1:
+        elif barrel.potion_type[1] == 100:
             green_ml_delivered += barrel.quantity * barrel.ml_per_barrel
             print("green ml: ", green_ml_delivered)
             cost += barrel.price * barrel.quantity
-        elif barrel.potion_type[2] == 1:
+        elif barrel.potion_type[2] == 100:
             blue_ml_delivered += barrel.quantity * barrel.ml_per_barrel
             cost += barrel.price * barrel.quantity
             print("blue ml: ", blue_ml_delivered)
-        elif barrel.potion_type[3] == 1:
+        elif barrel.potion_type[3] == 100:
             dark_ml_delivered += barrel.quantity * barrel.ml_per_barrel
             cost += barrel.price * barrel.quantity
             print("dark ml: ", dark_ml_delivered)
