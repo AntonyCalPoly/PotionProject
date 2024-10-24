@@ -22,6 +22,39 @@ class Barrel(BaseModel):
 @router.post("/deliver/{order_id}")
 def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
+    green_ml_delivered = 0
+    blue_ml_delivered = 0
+    red_ml_delivered = 0
+    dark_ml_delivered = 0
+    cost = 0
+
+    for barrel in barrels_delivered:
+        if barrel.potion_type[0] == 1:
+            red_ml_delivered += barrel.quantity * barrel.ml_per_barrel
+            cost += barrel.price * barrel.quantity
+            print("red ml: ", red_ml_delivered)
+        elif barrel.potion_type[1] == 1:
+            green_ml_delivered += barrel.quantity * barrel.ml_per_barrel
+            print("green ml: ", green_ml_delivered)
+            cost += barrel.price * barrel.quantity
+        elif barrel.potion_type[2] == 1:
+            blue_ml_delivered += barrel.quantity * barrel.ml_per_barrel
+            cost += barrel.price * barrel.quantity
+            print("blue ml: ", blue_ml_delivered)
+        elif barrel.potion_type[3] == 1:
+            dark_ml_delivered += barrel.quantity * barrel.ml_per_barrel
+            cost += barrel.price * barrel.quantity
+            print("dark ml: ", dark_ml_delivered)
+
+
+    with db.engine.begin() as connection:
+        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold - {cost}, red_ml = red_ml + {red_ml_delivered}, green_ml = green_ml + {green_ml_delivered}, blue_ml = blue_ml + {blue_ml_delivered}, dark_ml = dark_ml + {dark_ml_delivered}"))
+
+    
+    
+    
+    return "OK"
+'''
     print(f"barrels delivered: {barrels_delivered} order_id: {order_id}")
     for barrel in barrels_delivered:
         with db.engine.begin() as connection:
@@ -42,8 +75,8 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
                     "price": barrel.price * barrel.quantity
                 }
             )
+    '''
     
-    return "OK"
 # Gets called once a day
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
