@@ -23,25 +23,23 @@ class Barrel(BaseModel):
 def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
     print(f"barrels delivered: {barrels_delivered} order_id: {order_id}")
-    for barrel in barrels_delivered:
-        with db.engine.begin() as connection:
-            connection.execute(
-                sqlalchemy.text(
-                    """UPDATE global_inventory 
-                    SET red_ml = red_ml + :red_ml, 
-                        green_ml = green_ml + :green_ml, 
-                        blue_ml = blue_ml + :blue_ml, 
-                        dark_ml = dark_ml + :dark_ml, 
-                        gold = gold - :price;"""
-                ),
-                {
-                    "red_ml": barrel.ml_per_barrel * barrel.quantity * barrel.potion_type[0],
-                    "green_ml": barrel.ml_per_barrel * barrel.quantity * barrel.potion_type[1],
-                    "blue_ml": barrel.ml_per_barrel * barrel.quantity * barrel.potion_type[2],
-                    "dark_ml": barrel.ml_per_barrel * barrel.quantity * barrel.potion_type[3],
-                    "price": barrel.price * barrel.quantity
-                }
-            )
+    with db.engine.begin() as connection:
+        for barrel in barrels_delivered:
+            sql = """
+            UPDATE inventory
+            SET red_ml = red_ml + :red_ml,
+                green_ml = green_ml + :green_ml,
+                blue_ml = blue_ml + :blue_ml,
+                dark_ml = dark_ml + :dark_ml,
+                gold = gold - :price
+            """
+            connection.execute(sqlalchemy.text(sql), {
+                "red_ml": barrel.ml_per_barrel * barrel.quantity * barrel.potion_type[0],
+                "green_ml": barrel.ml_per_barrel * barrel.quantity * barrel.potion_type[1],
+                "blue_ml": barrel.ml_per_barrel * barrel.quantity * barrel.potion_type[2],
+                "dark_ml": barrel.ml_per_barrel * barrel.quantity * barrel.potion_type[3],
+                "price": barrel.price * barrel.quantity
+            })
     return "OK"
     
 # Gets called once a day
