@@ -63,32 +63,30 @@ def get_bottle_plan():
 
     bottler_plan = []
 
-    red_ml_left, green_ml_left, blue_ml_left, dark_ml_left = get_inventory
+    red_ml_left = get_inventory.red_ml
+    green_ml_left = get_inventory.green_ml 
+    blue_ml_left = get_inventory.blue_ml 
+    dark_ml_left = get_inventory.dark_ml
 
-    for potion_type in get_potions:
-        percent_red = potion_type[0]
-        percent_green = potion_type[1]
-        percent_blue = potion_type[2]
-        percent_dark = potion_type[3]
-
+    for get_potion in get_potions:
         max_potions = min(
-            red_ml_left // percent_red if percent_red > 0 else float('inf'),
-            green_ml_left // percent_green if percent_green > 0 else float('inf'),
-            blue_ml_left // percent_blue if percent_blue > 0 else float('inf'),
-            dark_ml_left // percent_dark if percent_dark > 0 else float('inf'),
+            red_ml_left // get_potion.red_ml if get_potion.red_ml > 0 else float('inf'),
+            green_ml_left // get_potion.green_ml if get_potion.green_ml > 0 else float('inf'),
+            blue_ml_left // get_potion.blue_ml if get_potion.blue_ml > 0 else float('inf'),
+            dark_ml_left // get_potion.dark_ml if get_potion.dark_ml > 0 else float('inf'),
             5  
         )
 
         if max_potions > 0:
             bottler_plan.append({
-                "potion_type": [percent_red, percent_green, percent_blue, percent_dark],
+                "potion_type": [get_potion.red_ml, get_potion.green_ml, get_potion.blue_ml, get_potion.dark_ml],
                 "quantity": int(max_potions)
             })
 
-            red_ml_left -= percent_red * max_potions
-            green_ml_left -= percent_green * max_potions
-            blue_ml_left -= percent_blue * max_potions
-            dark_ml_left -= percent_dark * max_potions
+            red_ml_left -= get_potion.red_ml * max_potions
+            green_ml_left -= get_potion.green_ml * max_potions
+            blue_ml_left -= get_potion.blue_ml * max_potions
+            dark_ml_left -= get_potion.dark_ml * max_potions
 
     return bottler_plan
 
