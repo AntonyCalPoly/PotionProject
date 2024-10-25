@@ -26,7 +26,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     with db.engine.begin() as connection:
         for barrel in barrels_delivered:
             sql = """
-            UPDATE inventory
+            UPDATE global_inventory
             SET red_ml = red_ml + :red_ml,
                 green_ml = green_ml + :green_ml,
                 blue_ml = blue_ml + :blue_ml,
