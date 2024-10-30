@@ -79,14 +79,14 @@ def get_bottle_plan():
 
         if max_potions > 0:
             bottler_plan.append({
-                "potion_type": [get_potion.red_ml, get_potion.green_ml, get_potion.blue_ml, get_potion.dark_ml],
+                "potion_type": [get_potion.percent_red, get_potion.percent_green, get_potion.percent_blue, get_potion.percent_dark],
                 "quantity": int(max_potions)
             })
 
-            red_ml_left -= get_potion.red_ml * max_potions
-            green_ml_left -= get_potion.green_ml * max_potions
-            blue_ml_left -= get_potion.blue_ml * max_potions
-            dark_ml_left -= get_potion.dark_ml * max_potions
+            red_ml_left -= get_potion.percent_red * max_potions
+            green_ml_left -= get_potion.percent_green * max_potions
+            blue_ml_left -= get_potion.percent_blue * max_potions
+            dark_ml_left -= get_potion.percent_dark * max_potions
 
     return bottler_plan
 
