@@ -70,10 +70,10 @@ def get_bottle_plan():
 
     for get_potion in get_potions:
         max_potions = min(
-            red_ml_left // get_potion.red_ml if get_potion.red_ml > 0 else float('inf'),
-            green_ml_left // get_potion.green_ml if get_potion.green_ml > 0 else float('inf'),
-            blue_ml_left // get_potion.blue_ml if get_potion.blue_ml > 0 else float('inf'),
-            dark_ml_left // get_potion.dark_ml if get_potion.dark_ml > 0 else float('inf'),
+            red_ml_left // get_potion.percent_red if get_potion.percent_red > 0 else float('inf'),
+            green_ml_left // get_potion.percent_green if get_potion.percent_green > 0 else float('inf'),
+            blue_ml_left // get_potion.percent_blue if get_potion.percent_blue > 0 else float('inf'),
+            dark_ml_left // get_potion.percent_dark if get_potion.percent_dark > 0 else float('inf'),
             5  
         )
 
