@@ -89,11 +89,9 @@ def post_visits(visit_id: int, customers: list[Customer]):
 def create_cart(new_cart: Customer):
     
     with db.engine.begin() as connection:
-        update_id  = connection.execute(sqlalchemy.text("SELECT cart_id FROM cart ORDER BY cart_id DESC")).fetchone()
-        cart_id = (update_id[0]+1)
-        connection.execute(sqlalchemy.text(f"INSERT INTO cart (customer_name, character_class, level, cart_id, quantity, payment) VALUES ('{new_cart.customer_name}','{new_cart.character_class}',{new_cart.level},{cart_id},{0},{0});"))
+        result = connection.execute(sqlalchemy.text(f"INSERT INTO cart (customer_name, character_class, level, quantity, payment) VALUES ('{new_cart.customer_name}','{new_cart.character_class}',{new_cart.level},{0},{0}) RETURNING cart_id;")).fetchone()
 
-    return {"cart_id": cart_id}
+    return {"cart_id": result.cart_id}
 
 class CartItem(BaseModel):
     quantity: int

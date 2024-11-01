@@ -45,5 +45,7 @@ def deliver_capacity_plan(capacity_purchase : CapacityPurchase, order_id: int):
     Start with 1 capacity for 50 potions and 1 capacity for 10000 ml of potion. Each additional 
     capacity unit costs 1000 gold.
     """
+    # while potion_capacity < 5 and gold > 1500 buy potion_capacity
+    # while ml_capacity < 5 and potion_capacity > 2 and gold > 1500 buy ml_capacity
 
     return "OK"
