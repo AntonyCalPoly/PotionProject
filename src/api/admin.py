@@ -39,7 +39,7 @@ def reset():
 
 
         connection.execute(sqlalchemy.text("DELETE FROM potions_ledger;"))
-        for id in range(1,6):
+        for id in range(1,7):
             connection.execute(sqlalchemy.text(f"INSERT INTO potions_ledger (pot_id, num_potions) VALUES ({id},0);"))
 
         
