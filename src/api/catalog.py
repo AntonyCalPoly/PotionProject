@@ -13,8 +13,16 @@ def get_catalog():
     catalog = []
 
     with db.engine.begin() as connection:
-         get_potions = connection.execute(sqlalchemy.text("SELECT id, num_potions, price, percent_red, percent_green, percent_blue, percent_dark, sku FROM custom_potions ORDER BY id DESC;")).fetchall()
-       
+        get_potions = connection.execute(sqlalchemy.text(
+            '''SELECT SUM(potions_ledger.num_potions) AS num_potions, custom_potions.id, price, percent_red, percent_green, percent_blue, percent_dark, sku 
+            FROM custom_potions 
+            JOIN potions_ledger
+                ON potions_ledger.pot_id = custom_potions.id
+            GROUP BY custom_potions.id
+            HAVING SUM(potions_ledger.num_potions) > 0
+            ORDER BY num_potions DESC,
+                SUM(potions_ledger.num_potions)''')).fetchall()
+
     count_of_skus = 0
 
     for potion in get_potions:

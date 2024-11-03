@@ -148,4 +148,4 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             }
             ).fetchone()
             
-    return {"total_potions_bought": checkout.quantity, "total_gold_paid": checkout.payment}
+    return {"total_potions_bought": -potion_ledger_update.num_potions, "total_gold_paid": gold_ledger_update.num_gold}
