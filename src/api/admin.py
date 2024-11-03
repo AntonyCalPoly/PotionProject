@@ -29,18 +29,18 @@ def reset():
         connection.execute(sqlalchemy.text(f"UPDATE custom_potions SET num_potions = 0 WHERE id = {6}"))
 
         connection.execute(sqlalchemy.text("DELETE FROM ml_ledger;"))
-        connection.execute(sqlalchemy.text("INSERT INTO ml_ledger (ml_id, num_ml) VALUES (1,0);"))
-        connection.execute(sqlalchemy.text("INSERT INTO ml_ledger (ml_id, num_ml) VALUES (2,0);"))
-        connection.execute(sqlalchemy.text("INSERT INTO ml_ledger (ml_id, num_ml) VALUES (3,0);"))
-        connection.execute(sqlalchemy.text("INSERT INTO ml_ledger (ml_id, num_ml) VALUES (4,0);"))
+        #connection.execute(sqlalchemy.text("INSERT INTO ml_ledger (ml_id, num_ml) VALUES (1,0);"))
+        #connection.execute(sqlalchemy.text("INSERT INTO ml_ledger (ml_id, num_ml) VALUES (2,0);"))
+        #connection.execute(sqlalchemy.text("INSERT INTO ml_ledger (ml_id, num_ml) VALUES (3,0);"))
+        #connection.execute(sqlalchemy.text("INSERT INTO ml_ledger (ml_id, num_ml) VALUES (4,0);"))
 
         connection.execute(sqlalchemy.text("DELETE FROM gold_ledger;"))
         connection.execute(sqlalchemy.text(f"INSERT INTO gold_ledger (num_gold) VALUES (100);"))
 
 
         connection.execute(sqlalchemy.text("DELETE FROM potions_ledger;"))
-        for id in range(1,7):
-            connection.execute(sqlalchemy.text(f"INSERT INTO potions_ledger (pot_id, num_potions) VALUES ({id},0);"))
+        #for id in range(1,7):
+            #connection.execute(sqlalchemy.text(f"INSERT INTO potions_ledger (pot_id, num_potions) VALUES ({id},0);"))
 
         
     return "OK"
