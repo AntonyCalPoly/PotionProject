@@ -52,7 +52,46 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
                 "dark_ml": dark_ml_update,
                 "price": price_update
             })
+
+            if red_ml_update > 0:
+                connection.execute(sqlalchemy.text(
+                    '''INSERT INTO ml_ledger 
+                    (ml_id, num_ml) 
+                    VALUES (:type, :num_ml)'''),
+                    {
+                        "type": 1,
+                        "num_ml": red_ml_update
+                    })
+            if green_ml_update > 0:
+                connection.execute(sqlalchemy.text(
+                    '''INSERT INTO ml_ledger 
+                    (ml_id, num_ml) 
+                    VALUES (:type, :num_ml)'''),
+                    {
+                        "type": 2,
+                        "num_ml": green_ml_update
+                    })
+            if blue_ml_update > 0:
+                connection.execute(sqlalchemy.text(
+                    '''INSERT INTO ml_ledger 
+                    (ml_id, num_ml) 
+                    VALUES (:type, :num_ml)'''),
+                    {
+                        "type": 3,
+                        "num_ml": blue_ml_update
+                    })
+            if dark_ml_update > 0:
+                connection.execute(sqlalchemy.text(
+                    '''INSERT INTO ml_ledger 
+                    (ml_id, num_ml) 
+                    VALUES (:type, :num_ml)'''),
+                    {
+                        "type": 4,
+                        "num_ml": dark_ml_update
+                    })
         
+            connection.execute(sqlalchemy.text(f"INSERT INTO gold_ledger (num_gold) VALUES (:gold);"), [{"gold": -price_update}])
+
         updated_inventory = connection.execute(sqlalchemy.text("SELECT red_ml, green_ml, blue_ml, dark_ml, gold FROM global_inventory")).fetchone()
         print(f"Updated inventory: {updated_inventory}")
 

@@ -33,8 +33,35 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
            
             if custom_potion:
                 connection.execute(sqlalchemy.text("UPDATE custom_potions SET num_potions = num_potions + :quantity WHERE id = :id;"),
-                    {"quantity": potion.quantity, "id": custom_potion.id})  
+                    {"quantity": potion.quantity, "id": custom_potion.id}) 
+
+                connection.execute(sqlalchemy.text(
+                '''INSERT INTO potions_ledger (pot_id, num_potions)
+                VALUES ((SELECT id FROM custom_potions
+                WHERE percent_red = :red_ml
+                    AND percent_green = :green_ml
+                    AND percent_blue = :blue_ml
+                    AND percent_dark = :dark_ml),
+                :potion_quantity);'''),
+                {
+                    "red_ml": potion.potion_type[0],
+                    "green_ml": potion.potion_type[1],
+                    "blue_ml": potion.potion_type[2],
+                    "dark_ml": potion.potion_type[3],
+                    "potion_quantity": potion.quantity
+                }
+                ) 
                 
+                for i in range(0,4):
+                    if potion.potion_type[i] > 0:
+                        connection.execute(sqlalchemy.text(
+                        f'''INSERT INTO ml_ledger (ml_id, num_ml)
+                        VALUES ({i+1}, :num_ml)'''),
+                        {
+                            "num_ml": -(potion.potion_type[i]* potion.quantity),
+                        }
+                        )
+
                 connection.execute(sqlalchemy.text("UPDATE global_inventory SET red_ml = red_ml - :red_ml, green_ml = green_ml - :green_ml, blue_ml = blue_ml - :blue_ml, dark_ml = dark_ml - :dark_ml;"),
                     {
                     "red_ml": potion.potion_type[0] * potion.quantity,

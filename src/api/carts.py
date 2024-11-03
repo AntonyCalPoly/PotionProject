@@ -127,4 +127,25 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         for potion in potions_bought:
             connection.execute(sqlalchemy.text(f"UPDATE custom_potions SET num_potions = num_potions - {potion.quantity} WHERE id = {potion.potion_type};"))
        
+        potion_ledger_update = connection.execute(sqlalchemy.text(
+            '''INSERT INTO potions_ledger 
+            (pot_id, num_potions) 
+            VALUES ((SELECT potion_type FROM cart_items WHERE cart_id = :cart_id), 
+            (SELECT -quantity FROM cart_items WHERE cart_id = :cart_id))
+            RETURNING num_potions'''),
+            {
+                "cart_id": cart_id
+            }
+            ).fetchone()
+        
+        gold_ledger_update = connection.execute(sqlalchemy.text(
+            '''INSERT INTO gold_ledger
+            (num_gold) 
+            VALUES ((SELECT payment FROM cart WHERE cart_id = :cart_id))
+            RETURNING num_gold'''),
+            {
+                "cart_id": cart_id
+            }
+            ).fetchone()
+            
     return {"total_potions_bought": checkout.quantity, "total_gold_paid": checkout.payment}
