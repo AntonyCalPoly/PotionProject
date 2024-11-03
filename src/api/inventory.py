@@ -28,10 +28,26 @@ def get_capacity_plan():
     Start with 1 capacity for 50 potions and 1 capacity for 10000 ml of potion. Each additional 
     capacity unit costs 1000 gold.
     """
+    inventory = get_inventory()
+    print(inventory)
+    potion_cap = 1
+    ml_cap = 1
+
+    with db.engine.begin() as connection:
+        info = connection.execute(sqlalchemy.text("SELECT potion_capacity, ml_capacity FROM capacity;")).fetchone()
+
+
+    while potion_cap < 5:
+        if(inventory["number_of_potions"] > (0.75 * info.potion_capacity * 50) and inventory["gold" > 1500]):
+            potion_cap += 1
+
+    while ml_cap < 5 and potion_cap > 2:
+        if(inventory["number_of_potions"] > (0.75 * info.ml_capacity * 10000) and inventory["gold" > 1500]):
+            ml_cap += 1
 
     return {
-        "potion_capacity": 0,
-        "ml_capacity": 0
+        "potion_capacity": potion_cap,
+        "ml_capacity": ml_cap
         }
 
 class CapacityPurchase(BaseModel):
@@ -47,5 +63,18 @@ def deliver_capacity_plan(capacity_purchase : CapacityPurchase, order_id: int):
     """
     # while potion_capacity < 5 and gold > 1500 buy potion_capacity
     # while ml_capacity < 5 and potion_capacity > 2 and gold > 1500 buy ml_capacity
+
+    with db.engine.begin() as connection:
+        connection.execute(sqlalchemy.text(
+            '''UPDATE capacity SET
+            potion_capacity = :potion_cap, 
+            ml_capacity  = :ml_cap
+            '''),
+            {
+                "potion_cap": capacity_purchase.potion_capacity,
+                "ml_cap": capacity_purchase.ml_capacity
+            }
+            )
+
 
     return "OK"
