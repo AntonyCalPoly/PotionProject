@@ -84,16 +84,21 @@ def get_bottle_plan():
     # Initial logic: bottle all barrels into red potions.
 
     with db.engine.begin() as connection:
-        get_inventory = connection.execute(sqlalchemy.text("SELECT red_ml, green_ml, blue_ml, dark_ml FROM global_inventory;")).fetchone()
+        #get_inventory = connection.execute(sqlalchemy.text("SELECT red_ml, green_ml, blue_ml, dark_ml FROM global_inventory;")).fetchone()
 
         get_potions = connection.execute(sqlalchemy.text("SELECT percent_red, percent_green, percent_blue, percent_dark, id FROM custom_potions;")).fetchall()
 
+        red_ml_left = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '1';")).fetchone()
+        green_ml_left = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '2';")).fetchone()
+        blue_ml_left = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '3';")).fetchone()
+        dark_ml_left = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '4';")).fetchone()
+
     bottler_plan = []
 
-    red_ml_left = get_inventory.red_ml
-    green_ml_left = get_inventory.green_ml 
-    blue_ml_left = get_inventory.blue_ml 
-    dark_ml_left = get_inventory.dark_ml
+    #red_ml_left = get_inventory.red_ml
+    #green_ml_left = get_inventory.green_ml 
+    #blue_ml_left = get_inventory.blue_ml 
+    #dark_ml_left = get_inventory.dark_ml
 
     for get_potion in get_potions:
         max_potions = min(
