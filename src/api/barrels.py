@@ -111,7 +111,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         green_ml = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '2';")).fetchone()[0]
         blue_ml = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '3';")).fetchone()[0]
         dark_ml = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '4';")).fetchone()[0]
-        gold = connection.execute(sqlalchemy.text("SELECT SUM(num_gold) FROM gold_ledger;")).fetchone()
+        gold = connection.execute(sqlalchemy.text("SELECT SUM(num_gold) FROM gold_ledger;")).fetchone()[0]
     
     purchase_plan = []
         
