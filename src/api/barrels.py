@@ -107,10 +107,10 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     with db.engine.begin() as connection:
         #inventory = connection.execute(sqlalchemy.text("SELECT red_ml, green_ml, blue_ml, dark_ml, gold FROM global_inventory")).fetchone()
         #red_ml, green_ml, blue_ml, dark_ml, gold = inventory
-        red_ml = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '1';")).fetchone()
-        green_ml = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '2';")).fetchone()
-        blue_ml = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '3';")).fetchone()
-        dark_ml = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '4';")).fetchone()
+        red_ml = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '1';")).fetchone()[0]
+        green_ml = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '2';")).fetchone()[0]
+        blue_ml = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '3';")).fetchone()[0]
+        dark_ml = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '4';")).fetchone()[0]
         gold = connection.execute(sqlalchemy.text("SELECT SUM(num_gold) FROM gold_ledger;")).fetchone()
     
     purchase_plan = []

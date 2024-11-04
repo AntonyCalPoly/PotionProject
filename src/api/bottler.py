@@ -88,10 +88,10 @@ def get_bottle_plan():
 
         get_potions = connection.execute(sqlalchemy.text("SELECT percent_red, percent_green, percent_blue, percent_dark, id FROM custom_potions;")).fetchall()
 
-        red_ml_left = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '1';")).fetchone()
-        green_ml_left = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '2';")).fetchone()
-        blue_ml_left = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '3';")).fetchone()
-        dark_ml_left = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '4';")).fetchone()
+        red_ml_left = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '1';")).fetchone()[0]
+        green_ml_left = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '2';")).fetchone()[0]
+        blue_ml_left = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '3';")).fetchone()[0]
+        dark_ml_left = connection.execute(sqlalchemy.text("SELECT SUM(num_ml) FROM ml_ledger WHERE ml_id = '4';")).fetchone()[0]
 
     bottler_plan = []
 
