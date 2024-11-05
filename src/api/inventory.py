@@ -30,8 +30,8 @@ def get_capacity_plan():
     """
     inventory = get_inventory()
     print(inventory)
-    potion_cap = 1
-    ml_cap = 1
+    potion_cap = 0
+    ml_cap = 0
 
     with db.engine.begin() as connection:
         info = connection.execute(sqlalchemy.text("SELECT potion_capacity, ml_capacity FROM capacity;")).fetchone()
