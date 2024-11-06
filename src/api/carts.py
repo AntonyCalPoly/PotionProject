@@ -68,6 +68,33 @@ def search_orders(
             }
         ],
     }
+'''
+    try:
+        with engine.begin() as conn:
+            conn.execute(sqlalchemy.insert(events).values(name = "grouchy"))
+
+            if sort is movie_sort_options.movie_title:
+                order_by = db.movies.c.title
+            elif sort is movie_sort_options.year:
+                order_by = db.movies.c.year
+            elif sort is movie_sort_options.rating:
+                order_by = sqlalchemy.desc(db.movies.c.imdb_rating)
+            else:
+                assert False
+
+            stmt = (
+                sqlalchemy.select(
+                    db.movies.c.movie_id,
+                    db.movies.c.title,
+                    db.movies.c.year,
+                    db.movies.c.imdb_rating,
+                    db.movies.c.imdb_votes,
+                )
+                .limit(limit)
+                .offset(offset)
+                .order_by(order_by, db.movies.c.movie_id)
+            )
+'''
 
 
 class Customer(BaseModel):
