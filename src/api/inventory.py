@@ -37,12 +37,12 @@ def get_capacity_plan():
         info = connection.execute(sqlalchemy.text("SELECT potion_capacity, ml_capacity FROM capacity;")).fetchone()
 
 
-    while potion_cap < 5:
-        if(inventory["number_of_potions"] > (0.75 * info.potion_capacity * 50) and inventory["gold" > 1500]):
+    while potion_cap < 5 and ml_cap >= 2:
+        if(inventory["number_of_potions"] > (0.3 * info.potion_capacity * 50) and inventory["gold" > 1500]):
             potion_cap += 1
 
-    while ml_cap < 5 and potion_cap > 2:
-        if(inventory["number_of_potions"] > (0.75 * info.ml_capacity * 10000) and inventory["gold" > 1500]):
+    while ml_cap < 5:
+        if(inventory["number_of_potions"] > (0.3 * info.ml_capacity * 10000) and inventory["gold" > 1500]):
             ml_cap += 1
 
     return {
