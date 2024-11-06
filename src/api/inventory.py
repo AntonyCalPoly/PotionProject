@@ -30,25 +30,24 @@ def get_capacity_plan():
     """
     inventory = get_inventory()
     print(inventory)
-    potion_cap = 0
-    ml_cap = 0
 
     with db.engine.begin() as connection:
-        info = connection.execute(sqlalchemy.text("SELECT potion_capacity, ml_capacity FROM capacity;")).fetchone()
+        info = connection.execute(sqlalchemy.text("SELECT SUM(potion_capacity) AS potion_capacity, SUM(ml_capacity) AS ml_capacity FROM capacity;")).fetchone()
+        potion_capacity, ml_capacity = info
 
+    while potion_capacity < 5 and ml_capacity >= 2:
+        if(inventory["gold"] > 1500):
+            return {
+                "potion_capacity": 1
+            }
 
-    while potion_cap < 5 and ml_cap >= 2:
-        if(inventory["gold" > 1500]):
-            potion_cap += 1
+    while ml_capacity < 5:
+        if(inventory["gold"] > 1500):
+            return {
+                "ml_capacity": 1
+            }
 
-    while ml_cap < 5:
-        if(inventory["gold" > 1500]):
-            ml_cap += 1
-
-    return {
-        "potion_capacity": potion_cap,
-        "ml_capacity": ml_cap
-        }
+    return {}
 
 class CapacityPurchase(BaseModel):
     potion_capacity: int
@@ -66,9 +65,14 @@ def deliver_capacity_plan(capacity_purchase : CapacityPurchase, order_id: int):
 
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(
-            '''UPDATE capacity SET
-            potion_capacity = :potion_cap, 
-            ml_capacity  = :ml_cap
+            '''INSERT INTO capacity
+            (potion_capacity, ml_capacity)
+            VALUES (:potion_cap, :ml_cap);
+
+            INSERT INTO gold_ledger (num_gold)
+            VALUES ((:potion_cap + :ml_cap) * -1000);
+            
+            UPDATE global_inventory SET gold = gold - (:potion_cap + :ml_cap) * 1000
             '''),
             {
                 "potion_cap": capacity_purchase.potion_capacity,
