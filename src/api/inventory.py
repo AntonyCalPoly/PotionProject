@@ -41,10 +41,21 @@ def get_capacity_plan():
                 "potion_capacity": 1
             }
 
+        else:
+            return {
+                "potion_capacity": 0
+            }
+
+    
     while ml_capacity < 5:
         if(inventory["gold"] > 1500):
             return {
                 "ml_capacity": 1
+            }
+
+        else:
+            return {
+                "ml_capacity": 0
             }
 
     return {}
