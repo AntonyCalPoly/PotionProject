@@ -11,7 +11,7 @@ def database_connection_url():
 
 engine = create_engine(database_connection_url(), pool_pre_ping=True)
 metadata_obj = sqlalchemy.MetaData()
-customers = sqlalchemy.Table("cart", metadata_obj, autoload_with=engine)
-potions = sqlalchemy.Table("custom_potions", metadata_obj, autoload_with=engine)
-cart = sqlalchemy.Table("cart_items", metadata_obj, autoload_with=engine)
+cart = sqlalchemy.Table("cart", metadata_obj, autoload_with=engine)
+custom_potions = sqlalchemy.Table("custom_potions", metadata_obj, autoload_with=engine)
+cart_items = sqlalchemy.Table("cart_items", metadata_obj, autoload_with=engine)
 

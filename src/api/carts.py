@@ -83,7 +83,7 @@ def search_orders(
         ).join(
             db.cart_items, db.cart_items.c.cart_id == db.cart.c.cart_id
         ).join(
-            db.cutom_potions, db.custom_potions.c.id == db.cart_items.c.potion_type
+            db.custom_potions, db.custom_potions.c.id == db.cart_items.c.potion_type
         )
         .order_by(order_by, db.cart.c.created_at)
         .offset(current_offset) 
@@ -100,7 +100,7 @@ def search_orders(
             ).join(
                 db.cart_items, db.cart_items.c.cart_id == db.cart.c.cart_id
             ).join(
-                db.cutom_potions, db.custom_potions.c.id == db.cart_items.c.potion_type
+                db.custom_potions, db.custom_potions.c.id == db.cart_items.c.potion_type
             )
             .order_by(order_by, db.cart.c.created_at)
             .offset(previous_offset) 
@@ -116,7 +116,7 @@ def search_orders(
             ).join(
                 db.cart_items, db.cart_items.c.cart_id == db.cart.c.cart_id
             ).join(
-                db.cutom_potions, db.custom_potions.c.id == db.cart_items.c.potion_type
+                db.custom_potions, db.custom_potions.c.id == db.cart_items.c.potion_type
             )
             .order_by(order_by, db.cart.c.created_at)
             .offset(next_offset) 
@@ -124,7 +124,7 @@ def search_orders(
     )
 
     if customer_name != "":
-        current_page = current_page.where(db.cart.c.customer_name(f"%{customer_name}%"))
+        current_page = current_page.where(db.cart.c.customer_name.ilike(f"%{customer_name}%"))
 
     previous_json = ""
 
