@@ -77,7 +77,7 @@ def search_orders(
     current_page = (
         sqlalchemy.select(
             db.cart.c.customer_name,
-            db.custom_potions.c.sku.label('potion_name'),
+            db.custom_potions.c.sku,
             db.cart.c.payment,
             db.cart.c.created_at
         ).join(
@@ -94,7 +94,7 @@ def search_orders(
         previous_page = (
             sqlalchemy.select(
                 db.cart.c.customer_name,
-                db.custom_potions.c.sku.label('potion_name'),
+                db.custom_potions.c.sku,
                 db.cart.c.payment,
                 db.cart.c.created_at
             ).join(
@@ -110,7 +110,7 @@ def search_orders(
     next_page = (
        sqlalchemy.select(
                 db.cart.c.customer_name,
-                db.custom_potions.c.sku.label('potion_name'),
+                db.custom_potions.c.sku,
                 db.cart.c.payment,
                 db.cart.c.created_at
             ).join(
@@ -124,7 +124,10 @@ def search_orders(
     )
 
     if customer_name != "":
-        current_page = current_page.where(db.cart.c.customer_name.ilike(f"%{customer_name}%"))
+        current_page = current_page.where(db.cart.c.customer_name.like(f"%{customer_name}%"))
+
+    if potion_sku != "":
+        current_page = current_page.where(db.custom_potions.c.sku.like(f"%{potion_sku}%"))
 
     previous_json = ""
 
@@ -135,7 +138,7 @@ def search_orders(
             current_json.append(
                 {
                     "customer_name": row.customer_name,
-                    "item_sku": row.potion_name,
+                    "item_sku": row.sku,
                     "line_item_total": row.payment,
                     "timestamp": row.created_at
                 }
@@ -147,7 +150,7 @@ def search_orders(
                 previous_json.append(
                     {
                         "customer_name": row.customer_name,
-                        "item_sku": row.potion_name,
+                        "item_sku": row.sku,
                         "line_item_total": row.payment,
                         "timestamp": row.created_at
                     }
@@ -158,7 +161,7 @@ def search_orders(
             next_json.append(
                 {
                     "customer_name": row.customer_name,
-                    "item_sku": row.potion_name,
+                    "item_sku": row.sku,
                     "line_item_total": row.payment,
                     "timestamp": row.created_at
                 }

@@ -30,33 +30,30 @@ def get_capacity_plan():
     """
     inventory = get_inventory()
     print(inventory)
+    potion_cap = 0
+    ml_cap = 0
 
     with db.engine.begin() as connection:
         info = connection.execute(sqlalchemy.text("SELECT SUM(potion_capacity) AS potion_capacity, SUM(ml_capacity) AS ml_capacity FROM capacity;")).fetchone()
         potion_capacity, ml_capacity = info
 
-    if potion_capacity is None:
-        potion_capacity = 0
-    if ml_capacity is None:
-        ml_capacity = 0
-
     while potion_capacity < 5 and ml_capacity >= 2:
         if inventory["gold"] > 1500:
-            potion_capacity += 1
-            return {"potion_capacity": potion_capacity}
+            potion_cap += 1
+            return {"potion_capacity": potion_cap}
 
         else:
             return {"potion_capacity": 0}
 
     while ml_capacity < 5:
         if inventory["gold"] > 1500:
-            ml_capacity += 1
-            return {"ml_capacity": ml_capacity}
+            ml_cap += 1
+            return {"ml_capacity": ml_cap}
 
         else:
             return {"ml_capacity": 0}
 
-    return {"potion_capacity": potion_capacity, "ml_capacity": ml_capacity}
+    return {"potion_capacity": potion_cap, "ml_capacity": ml_cap}
 
 class CapacityPurchase(BaseModel):
     potion_capacity: int
@@ -71,7 +68,7 @@ def deliver_capacity_plan(capacity_purchase : CapacityPurchase, order_id: int):
     """
     # while potion_capacity < 5 and gold > 1500 buy potion_capacity
     # while ml_capacity < 5 and potion_capacity > 2 and gold > 1500 buy ml_capacity
-
+    print(f"Capacity Purchase: {capacity_purchase.potion_capacity}, {capacity_purchase.ml_capacity}")
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(
             '''INSERT INTO capacity
