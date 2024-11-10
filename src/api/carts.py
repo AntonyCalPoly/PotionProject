@@ -55,6 +55,122 @@ def search_orders(
     time is 5 total line items.
     """
 
+    if sort_col is search_sort_options.customer_name:
+        order_by = db.cart.c.customer_name
+    elif sort_col is search_sort_options.item_sku:
+        order_by = db.custom_potions.c.id
+    elif sort_col is search_sort_options.line_item_total:
+        order_by = db.cart.c.payment
+    elif sort_col is search_sort_options.timestamp:
+        order_by = db.cart.c.created_at
+    else:
+        assert False
+
+    if search_page != "":
+        current_offset = int(search_page) * 5
+        previous_offset = current_offset - 5
+    else:
+        current_offset = 0
+
+    next_offset = current_offset + 5
+
+    current_page = (
+        sqlalchemy.select(
+            db.cart.c.customer_name,
+            db.custom_potions.c.sku.label('potion_name'),
+            db.cart.c.payment,
+            db.cart.c.created_at
+        ).join(
+            db.cart_items, db.cart_items.c.cart_id == db.cart.c.cart_id
+        ).join(
+            db.cutom_potions, db.custom_potions.c.id == db.cart_items.c.potion_type
+        )
+        .order_by(order_by, db.cart.c.created_at)
+        .offset(current_offset) 
+        .limit(5)
+    )
+
+    if current_offset > 0:
+        previous_page = (
+            sqlalchemy.select(
+                db.cart.c.customer_name,
+                db.custom_potions.c.sku.label('potion_name'),
+                db.cart.c.payment,
+                db.cart.c.created_at
+            ).join(
+                db.cart_items, db.cart_items.c.cart_id == db.cart.c.cart_id
+            ).join(
+                db.cutom_potions, db.custom_potions.c.id == db.cart_items.c.potion_type
+            )
+            .order_by(order_by, db.cart.c.created_at)
+            .offset(previous_offset) 
+            .limit(5)
+            )
+
+    next_page = (
+       sqlalchemy.select(
+                db.cart.c.customer_name,
+                db.custom_potions.c.sku.label('potion_name'),
+                db.cart.c.payment,
+                db.cart.c.created_at
+            ).join(
+                db.cart_items, db.cart_items.c.cart_id == db.cart.c.cart_id
+            ).join(
+                db.cutom_potions, db.custom_potions.c.id == db.cart_items.c.potion_type
+            )
+            .order_by(order_by, db.cart.c.created_at)
+            .offset(next_offset) 
+            .limit(5)
+    )
+
+    if customer_name != "":
+        current_page = current_page.where(db.cart.c.customer_name(f"%{customer_name}%"))
+
+    previous_json = ""
+
+    with db.engine.connect() as conn:
+        current_result = conn.execute(current_page)
+        current_json = []
+        for row in current_result:
+            current_json.append(
+                {
+                    "customer_name": row.customer_name,
+                    "item_sku": row.potion_name,
+                    "line_item_total": row.payment,
+                    "timestamp": row.created_at
+                }
+            )
+        if current_offset > 0:
+            previous_result = conn.execute(previous_page)
+            previous_json = []
+            for row in previous_result:
+                previous_json.append(
+                    {
+                        "customer_name": row.customer_name,
+                        "item_sku": row.potion_name,
+                        "line_item_total": row.payment,
+                        "timestamp": row.created_at
+                    }
+                )
+        next_result = conn.execute(next_page)
+        next_json = []
+        for row in next_result:
+            next_json.append(
+                {
+                    "customer_name": row.customer_name,
+                    "item_sku": row.potion_name,
+                    "line_item_total": row.payment,
+                    "timestamp": row.created_at
+                }
+            )
+    
+    return {
+        "previous": previous_json,
+        "results": current_json,
+        "next": next_json
+    }
+
+'''
     return {
         "previous": "",
         "next": "",
@@ -69,33 +185,6 @@ def search_orders(
         ],
     }
 '''
-    try:
-        with engine.begin() as conn:
-            conn.execute(sqlalchemy.insert(events).values(name = "grouchy"))
-
-            if sort is movie_sort_options.movie_title:
-                order_by = db.movies.c.title
-            elif sort is movie_sort_options.year:
-                order_by = db.movies.c.year
-            elif sort is movie_sort_options.rating:
-                order_by = sqlalchemy.desc(db.movies.c.imdb_rating)
-            else:
-                assert False
-
-            stmt = (
-                sqlalchemy.select(
-                    db.movies.c.movie_id,
-                    db.movies.c.title,
-                    db.movies.c.year,
-                    db.movies.c.imdb_rating,
-                    db.movies.c.imdb_votes,
-                )
-                .limit(limit)
-                .offset(offset)
-                .order_by(order_by, db.movies.c.movie_id)
-            )
-'''
-
 
 class Customer(BaseModel):
     customer_name: str
