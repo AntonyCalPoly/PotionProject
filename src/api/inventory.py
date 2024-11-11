@@ -37,7 +37,7 @@ def get_capacity_plan():
         info = connection.execute(sqlalchemy.text("SELECT SUM(potion_capacity) AS potion_capacity, SUM(ml_capacity) AS ml_capacity FROM capacity;")).fetchone()
         potion_capacity, ml_capacity = info
 
-    while potion_capacity < 5 and ml_capacity >= 2:
+    while potion_capacity < 10:
         if inventory["gold"] > 1500:
             potion_cap += 1
             return {"potion_capacity": potion_cap}
@@ -45,7 +45,7 @@ def get_capacity_plan():
         else:
             return {"potion_capacity": 0}
 
-    while ml_capacity < 5:
+    while ml_capacity < 10:
         if inventory["gold"] > 1500:
             ml_cap += 1
             return {"ml_capacity": ml_cap}
