@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 from src.api import auth
 from enum import Enum
+from sqlalchemy import desc, asc
 
 
 router = APIRouter(
@@ -66,13 +67,20 @@ def search_orders(
     else:
         assert False
 
-    if search_page != "":
-        current_offset = int(search_page) * 5
-        previous_offset = current_offset - 5
+    if search_page.startswith("?search_page="):
+        try:
+            page_num = int(search_page.split("=")[-1])
+        except ValueError:
+            page_num = 1
     else:
-        current_offset = 0
+        page_num = 1
+    
+    current_offset = (page_num -1) * 5
 
-    next_offset = current_offset + 5
+    if sort_order == search_sort_order.desc:
+        sorting_order = desc
+    else:
+        sorting_order = asc
 
     current_page = (
         sqlalchemy.select(
@@ -85,42 +93,9 @@ def search_orders(
         ).join(
             db.custom_potions, db.custom_potions.c.id == db.cart_items.c.potion_type
         )
-        .order_by(order_by, db.cart.c.created_at)
+        .order_by(sorting_order(order_by))
         .offset(current_offset) 
         .limit(5)
-    )
-
-    if current_offset > 0:
-        previous_page = (
-            sqlalchemy.select(
-                db.cart.c.customer_name,
-                db.custom_potions.c.sku,
-                db.cart.c.payment,
-                db.cart.c.created_at
-            ).join(
-                db.cart_items, db.cart_items.c.cart_id == db.cart.c.cart_id
-            ).join(
-                db.custom_potions, db.custom_potions.c.id == db.cart_items.c.potion_type
-            )
-            .order_by(order_by, db.cart.c.created_at)
-            .offset(previous_offset) 
-            .limit(5)
-            )
-
-    next_page = (
-       sqlalchemy.select(
-                db.cart.c.customer_name,
-                db.custom_potions.c.sku,
-                db.cart.c.payment,
-                db.cart.c.created_at
-            ).join(
-                db.cart_items, db.cart_items.c.cart_id == db.cart.c.cart_id
-            ).join(
-                db.custom_potions, db.custom_potions.c.id == db.cart_items.c.potion_type
-            )
-            .order_by(order_by, db.cart.c.created_at)
-            .offset(next_offset) 
-            .limit(5)
     )
 
     if customer_name != "":
@@ -128,8 +103,6 @@ def search_orders(
 
     if potion_sku != "":
         current_page = current_page.where(db.custom_potions.c.sku.like(f"%{potion_sku}%"))
-
-    previous_json = ""
 
     with db.engine.connect() as conn:
         current_result = conn.execute(current_page)
@@ -143,34 +116,20 @@ def search_orders(
                     "timestamp": row.created_at
                 }
             )
-        if current_offset > 0:
-            previous_result = conn.execute(previous_page)
-            previous_json = []
-            for row in previous_result:
-                previous_json.append(
-                    {
-                        "customer_name": row.customer_name,
-                        "item_sku": row.sku,
-                        "line_item_total": row.payment,
-                        "timestamp": row.created_at
-                    }
-                )
-        next_result = conn.execute(next_page)
-        next_json = []
-        for row in next_result:
-            next_json.append(
-                {
-                    "customer_name": row.customer_name,
-                    "item_sku": row.sku,
-                    "line_item_total": row.payment,
-                    "timestamp": row.created_at
-                }
-            )
-    
+    if page_num > 1:
+        previous = f"?search_page={page_num - 1}"
+    else: 
+        previous = ""
+        
+    if len(current_json) == 5:
+        next = f"?search_page={page_num +1}"
+    else: 
+        next = ""
+
     return {
-        "previous": previous_json,
+        "previous": previous,
         "results": current_json,
-        "next": next_json
+        "next": next
     }
 
 '''
