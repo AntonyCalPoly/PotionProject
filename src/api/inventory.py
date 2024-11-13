@@ -40,19 +40,17 @@ def get_capacity_plan():
     while potion_capacity < 10:
         if inventory["gold"] > 1500:
             potion_cap += 1
-            return {"potion_capacity": potion_cap}
-
         else:
-            return {"potion_capacity": 0}
+            break
+            
 
     while ml_capacity < 10:
         if inventory["gold"] > 1500:
             ml_cap += 1
-            return {"ml_capacity": ml_cap}
-
         else:
-            return {"ml_capacity": 0}
-
+            break
+            
+    print("potion_capacity", potion_cap, "ml_capacity", ml_cap)
     return {"potion_capacity": potion_cap, "ml_capacity": ml_cap}
 
 class CapacityPurchase(BaseModel):
