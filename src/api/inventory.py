@@ -38,10 +38,10 @@ def get_capacity_plan():
         potion_capacity, ml_capacity = info
 
     
-    if inventory["gold"] > 1500:
+    if inventory["gold"] > 4000:
         potion_cap += 1
        
-    if inventory["gold"] > 1500:
+    if inventory["gold"] > 4000:
         ml_cap += 1
        
             
